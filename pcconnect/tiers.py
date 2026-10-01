@@ -177,6 +177,13 @@ def _offline_stub(worker, messages):
     stubs = {
         "granite30b_skeptic": "NO_MATERIAL_OBJECTION",
         "granite_skeptic": "NO_MATERIAL_OBJECTION",
+        "moa_resolver": {
+            "interpretation": "offline stub — not evidence",
+            "supporting_evidence": [],
+            "weakening_evidence": [],
+            "assumptions_required": [],
+            "unresolved_gaps": [],
+        },
         "qwen125b_adjudicator": {
             "issue": "offline stub adjudication",
             "decision": "UNRESOLVED",
@@ -184,8 +191,11 @@ def _offline_stub(worker, messages):
             "narrowest_defensible_conclusion": "offline stub — not evidence",
             "supporting_evidence": [],
             "contradicting_evidence": [],
+            "source_lineage_considerations": [],
+            "alternative_explanations": [],
+            "unresolved_questions": [],
+            "recommended_evidence_to_obtain": [],
             "human_review_required": True,
-            "recommended_followup": [],
         },
         "qwen_vl_examiner": {
             "visible_text": [],

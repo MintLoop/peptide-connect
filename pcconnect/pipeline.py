@@ -19,7 +19,7 @@ from . import tiers
 from .adapters import base as adapters_base
 from .adapters.base import get_adapter, utcnow_iso
 from .entity import build_blocking_records, resolve_identity, new_supplier_from_observation
-from .moa import route_packet, gate_125b, granite_decision
+from .moa import route_packet, gate_125b, granite_decision, should_open_panel, run_panel
 from .store import Store
 
 PROMPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "prompts")
@@ -255,25 +255,30 @@ class Pipeline(object):
             })
             objections = gran_out.get("output")
             verdict, needs_adj, categories = granite_decision(objections)
-            if verdict == "OBJECTIONS":
-                invoke, reason = gate_125b(objections, None)
-                if invoke:
-                    self.counters["qwen125b_escalations"] += 1
-                    adj_out = self._call_tier("qwen125b_adjudicator", "qwen3.8-flash-next:125b-mlx", {
-                        "packet_id": sid,
-                        "envelope": envelope,
-                        "deterministic": det,
-                        "extraction": extraction,
-                        "objections": objections,
-                    })
-                    adj = adj_out.get("output") or {}
-                    if isinstance(adj, dict) and adj.get("human_review_required"):
-                        self.counters["human_review_queue"] += 1
-                        self.store.event("human_review", source_id=sid, issue=adj.get("issue"))
-                        return {"state": "human_review", "source_id": sid, "adjudication": adj}
-                # objections not material -> apply Granite corrections if any
-                corrections = self._apply_corrections(extraction, objections)
-                return self._store_extraction(sid, envelope, {"output": corrections}, route2)
+            # MoA contract: open the panel only when a material unresolved issue
+            # REMAINS after normal validation (Granite audit included)
+            issue = self._classify_issue(envelope, det, extraction)
+            open_panel, panel_reason = should_open_panel(extraction, {"verdict": verdict}, issue)
+            if open_panel:
+                self.counters["qwen125b_escalations"] += 1
+                panel_packet = {
+                    "packet_id": sid,
+                    "envelope": envelope,
+                    "deterministic": det,
+                    "extraction": extraction,
+                    "objections": objections,
+                }
+                panel_result = run_panel(self._call_tier, panel_packet, issue)
+                adj = panel_result.get("adjudication")
+                self.store.event("moa_panel", source_id=sid, issue=issue.get("category") if issue else None,
+                                 reason=panel_reason)
+                if isinstance(adj, dict) and adj.get("human_review_required"):
+                    self.counters["human_review_queue"] += 1
+                    self.store.event("human_review", source_id=sid, issue=adj.get("issue"))
+                    return {"state": "human_review", "source_id": sid, "adjudication": adj,
+                            "panel": {k: panel_result[k] for k in ("panel_id", "issue")}}
+                # panel concluded without human review — store the adjudicated extraction
+                return self._store_extraction(sid, envelope, {"output": extraction}, route2)
             return self._store_extraction(sid, envelope, {"output": extraction}, route2)
         return self._store_extraction(sid, envelope, {"output": extraction}, route2)
 
@@ -357,6 +362,40 @@ class Pipeline(object):
             return True  # marketing-claim language present — skeptic must audit
         return False
 
+    def _classify_issue(self, envelope, det, extraction):
+        """Map deterministic signals + extraction flags to a MoA-eligible issue
+        category (contracts/MOA_CONTRACT.md §ESCALATION CONDITIONS).
+
+        Returns an issue dict {category, detail, escalation_reason} or None.
+        Deliberately conservative: sparse evidence, missing fields, LOW
+        confidence, WhatsApp usage, and promotional language are NOT issues
+        (the contract's do-not-escalate list).
+        """
+        content = envelope["content"]
+        # cross-source contradiction: same evidence family, conflicting content
+        sid_families = {}
+        for ln in self.store.read_all("evidence_lineage"):
+            sid_families.setdefault(ln["evidence_family_id"], []).append(ln["source_id"])
+        family = ids.evidence_family_id(content.get("laboratory") or envelope["source_type"],
+                                        content.get("report_id") or envelope["source_record_id"])
+        members = sid_families.get(family, [])
+        if len(members) > 1 and envelope["source_type"] in ("finnrick", "peptidebenchmark", "b2b_directory"):
+            return {"category": "duplicated_evidence_with_uncertain_lineage",
+                    "detail": "evidence family %s referenced by %d sources" % (family, len(members)),
+                    "escalation_reason": "syndicated reference with uncertain lineage"}
+        # regulatory record mentioning a known supplier -> potential material action
+        if envelope["source_type"] == "regulatory_source":
+            return {"category": "source_disagreement_affecting_dossier",
+                    "detail": "regulatory record intersects supplier dossier",
+                    "escalation_reason": "regulatory record"}
+        # unresolved identity signals in the extraction itself
+        if isinstance(extraction, dict):
+            reason = extraction.get("escalation_reason") or ""
+            if "identity" in reason.lower() or "ambiguous" in reason.lower():
+                return {"category": "ambiguous_entity_identity",
+                        "detail": reason, "escalation_reason": reason}
+        return None
+
     def _apply_corrections(self, extraction, objections):
         """Apply Granite's recommended corrections to assertion-level fields.
 
@@ -386,6 +425,7 @@ class Pipeline(object):
     def _call_tier(self, worker, model, packet, schema=None):
         prompt_file = {
             "qwen27b_extraction": "qwen27b_extraction.md",
+            "moa_resolver": "moa_resolver.md",
             "granite30b_skeptic": "granite30b_skeptic.md",
             "qwen125b_adjudicator": "qwen125b_adjudicator.md",
             "qwen_vl_examiner": "qwen_vl_examiner.md",
@@ -401,6 +441,7 @@ class Pipeline(object):
         result = tiers.call_worker(worker, model, messages, schema=schema, metrics=self.metrics, label=packet.get("packet_id"))
         model_key = {
             "qwen27b_extraction": "qwen27b_calls",
+            "moa_resolver": "granite_escalations",
             "granite30b_skeptic": "granite_escalations",
             "qwen125b_adjudicator": "qwen125b_escalations",
             "qwen_vl_examiner": "qwen_vl_calls",
@@ -427,6 +468,13 @@ class Pipeline(object):
         if worker == "qwen125b_adjudicator":
             parts.append("extraction: " + hashing.canonical_json(packet.get("extraction") or {}))
             parts.append("objections: " + hashing.canonical_json(packet.get("objections") or []))
+        if worker == "moa_resolver":
+            parts.append("issue_to_interpret: " + hashing.canonical_json(packet.get("issue") or {}))
+        if worker == "granite30b_skeptic" and packet.get("resolver_analysis") is not None:
+            parts.append("resolver_analysis_to_falsify: " + hashing.canonical_json(packet["resolver_analysis"]))
+        if worker == "qwen125b_adjudicator" and packet.get("resolver_analysis") is not None:
+            parts.append("resolver_analysis: " + hashing.canonical_json(packet["resolver_analysis"]))
+            parts.append("skeptic_analysis: " + hashing.canonical_json(packet.get("skeptic_analysis") or {}))
         content = env.get("content") or {}
         body = content.get("text") or hashing.canonical_json(content)
         parts.append("evidence_content: " + (body[:6000] if isinstance(body, str) else hashing.canonical_json(body)[:6000]))

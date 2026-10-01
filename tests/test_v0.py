@@ -152,9 +152,9 @@ def test_125b_gate_requires_material_issue():
     ok2, reason2 = gate_125b([{"severity": "HIGH", "adjudication_required": True,
                                "material_issue_category": "routine_disagreement"}], None)
     assert ok2 is False
-    # HIGH severity + material category + dossier impact: 125B
+    # HIGH severity + eligible category + dossier impact: 125B
     ok3, _ = gate_125b([{"severity": "HIGH", "adjudication_required": True,
-                         "material_issue_category": "difficult_identity_collision"}], None)
+                         "material_issue_category": "ambiguous_entity_identity"}], None)
     assert ok3 is True
     # LOW-confidence alone is never a trigger (Master Pack §11)
     ok4, _ = gate_125b([], None)
@@ -166,6 +166,111 @@ def test_granite_no_objection_passthrough():
     assert verdict == "NO_MATERIAL_OBJECTION" and adj is False
     verdict2, adj2, _ = granite_decision([{"severity": "HIGH", "adjudication_required": True}])
     assert verdict2 == "OBJECTIONS" and adj2 is True
+
+
+# -- MoA panel (contracts/MOA_CONTRACT.md) --------------------------------------
+def test_moa_panel_opens_only_for_material_unresolved_issues():
+    from pcconnect.moa import should_open_panel
+    # eligible issue + Granite objections remain -> panel opens
+    ok, reason = should_open_panel(
+        {}, {"verdict": "OBJECTIONS"},
+        {"category": "ambiguous_entity_identity", "escalation_reason": "two domains collide"})
+    assert ok is True
+    # Granite found nothing material -> no panel (issue resolved by normal validation)
+    ok2, reason2 = should_open_panel(
+        {}, {"verdict": "NO_MATERIAL_OBJECTION"},
+        {"category": "ambiguous_entity_identity"})
+    assert ok2 is False and reason2 == "no_unresolved_issue_after_validation"
+    # ineligible category -> no panel
+    ok3, _ = should_open_panel({}, {"verdict": "OBJECTIONS"}, {"category": "routine_disagreement"})
+    assert ok3 is False
+    # no issue at all -> no panel
+    ok4, _ = should_open_panel({}, {"verdict": "OBJECTIONS"}, None)
+    assert ok4 is False
+
+
+def test_moa_do_not_escalate_list():
+    from pcconnect.moa import should_open_panel, NON_ESCALATION_REASONS
+    assert len(NON_ESCALATION_REASONS) == 5  # LOW confidence, missing fields, WhatsApp, promotional, sparse
+    for banned_reason in ["extraction confidence is low", "evidence is sparse",
+                          "supplier uses whatsapp", "promotional language", "missing fields"]:
+        ok, why = should_open_panel(
+            {}, {"verdict": "OBJECTIONS"},
+            {"category": "ambiguous_entity_identity", "escalation_reason": banned_reason})
+        assert ok is False, "should NOT escalate for: %s" % banned_reason
+
+
+def test_adjudication_schema_matches_contract():
+    schema = json.load(open(os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "pcconnect", "schemas", "adjudication.schema.json")))
+    # contract REQUIRED FINAL OUTPUT fields, exactly
+    assert set(schema["required"]) == {
+        "issue", "decision", "confidence", "narrowest_defensible_conclusion",
+        "supporting_evidence", "contradicting_evidence", "source_lineage_considerations",
+        "alternative_explanations", "unresolved_questions",
+        "recommended_evidence_to_obtain", "human_review_required"}
+    assert schema["properties"]["decision"]["enum"] == [
+        "VERIFIED", "LIKELY", "POSSIBLE", "UNVERIFIED",
+        "CONTRADICTED", "UNRESOLVED", "INSUFFICIENT_EVIDENCE"]
+    assert schema["properties"]["confidence"]["enum"] == ["HIGH", "MEDIUM", "LOW"]
+
+
+def test_panel_runs_resolver_skeptic_adjudicator_offline():
+    """Offline: the panel orchestrates Resolver → Skeptic → Adjudicator when the
+    router opens it, and the human-review stub routes to HUMAN_REVIEW. (The
+    offline skeptic stub returns NO_MATERIAL_OBJECTION, so the full-pipeline
+    path legitimately does NOT open the panel — verified by the gate tests above.)"""
+    tmp = tempfile.mkdtemp(prefix="pcv0_")
+    try:
+        from pcconnect.moa import run_panel
+        p = Pipeline(tmp, offline=True)
+        issue = {"category": "source_disagreement_affecting_dossier",
+                 "detail": "regulatory record intersects supplier dossier",
+                 "escalation_reason": "regulatory record"}
+        packet = {
+            "packet_id": "SRC-TEST-01",
+            "envelope": {"source_type": "regulatory_source",
+                         "content": {"text": "Import alert 99-08: detention of peptide shipments."}},
+            "deterministic": {},
+            "extraction": {"assertions": []},
+        }
+        result = run_panel(p._call_tier, packet, issue)
+        assert result["panel_id"] == "MOA-SRC-TEST-01"
+        # all three roles ran through the offline stubs
+        assert result["resolver"]["interpretation"].startswith("offline stub")
+        assert result["adjudication"]["decision"] == "UNRESOLVED"
+        assert result["adjudication"]["human_review_required"] is True
+        # adjudication stub is schema-valid against the contract schema
+        from jsonschema import Draft202012Validator
+        schema = json.load(open(os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "pcconnect", "schemas", "adjudication.schema.json")))
+        assert not list(Draft202012Validator(schema).iter_errors(result["adjudication"]))
+        calls = p.metrics.calls
+        assert calls.get("qwen3.8:27b-mlx-menta-64k", 0) >= 1  # resolver
+        assert calls.get("granite4.2:30b", 0) >= 1             # skeptic
+        assert calls.get("qwen3.8-flash-next:125b-mlx", 0) == 1  # adjudicator
+    finally:
+        shutil.rmtree(tmp)
+
+
+def test_regulatory_record_routes_questionable_but_panel_closed_offline():
+    """The regulatory record is Granite-audited (policy), but with the offline
+    skeptic returning NO_MATERIAL_OBJECTION the MoA panel stays closed —
+    the contract's 'remains after normal validation' test."""
+    tmp = tempfile.mkdtemp(prefix="pcv0_")
+    try:
+        p = Pipeline(tmp, offline=True)
+        out = p.ingest_one("regulatory_source",
+                           {"record_id": "REG-2026-001",
+                            "text": "Import alert 99-08: detention of peptide shipments listing Meridian Supply Co as consignee."},
+                           retrieved_at="2026-09-30T20:00:00Z")
+        assert out["outcome"]["state"] == "stored"
+        assert p.counters["granite_escalations"] == 1
+        assert p.counters["qwen125b_escalations"] == 0  # panel correctly NOT opened
+    finally:
+        shutil.rmtree(tmp)
 
 
 # -- store idempotency / incremental ---------------------------------------------

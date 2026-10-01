@@ -15,10 +15,13 @@ reduces suppliers to good/bad labels, and never converts claims into facts.
 2. **Compact Runtime Prompts** (`contracts/COMPACT_RUNTIME_PROMPTS.md` → `prompts/*.md`) —
    persistent per-worker contracts. Each worker receives ONLY: its compact prompt, the
    relevant schema, the minimum evidence packet, and candidate records.
-3. **MoA Contract** (`contracts/MOA_CONTRACT.md`) — exceptional escalation governance.
-   The Escalation Router (deterministic code, `pcconnect/moa/router.py`) alone promotes
-   packets between tiers. The 125B gate requires ALL of: Granite HIGH-severity objection
-   with adjudication_required, a material-issue category, and dossier impact.
+3. **MoA Contract** (`contracts/MOA_CONTRACT.md`) — the Menta MoA escalation contract
+   (verbatim). Exception-resolution mechanism, NOT the normal path. The panel
+   (Resolver: qwen27b → Skeptic: granite → Adjudicator: 125B) opens only when a
+   material unresolved issue remains after normal validation. The panel must not
+   vote; agreement between models is not evidence. Adjudicator output validates
+   against `pcconnect/schemas/adjudication.schema.json` (the contract's REQUIRED
+   FINAL OUTPUT fields exactly).
 
 ## Model assignments (config/models.yaml)
 

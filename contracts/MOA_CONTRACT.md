@@ -1,65 +1,185 @@
-# PEPTIDE CONNECT — MoA ESCALATION CONTRACT
+# PEPTIDE CONNECT — MENTA MoA ESCALATION CONTRACT
 
-This document governs **exceptional escalations only**. It is the third layer of the
-system, separate from the Master Pack (architecture) and the Compact Runtime Prompts
-(persistent worker contracts).
+The MoA is an exception-resolution mechanism.
 
-Routine work never consults this document. A worker that is unsure sets
-`requires_validation=true` and stops; the router — not the worker — decides escalation.
+It is not the normal processing path.
+
+The system should attempt to resolve routine evidence through:
+
+`deterministic tooling → Qwen 27B → schema validation`
+
+before invoking additional models.
 
 ---
 
-## 1. Escalation authority
+# PANEL
 
-Only the **Escalation Router** (deterministic code, `pcconnect/moa/router.py`) may
-promote a packet to a higher tier. Workers never escalate themselves, never invoke
-other workers, and never retry each other's output.
+## Resolver
 
-## 2. Route classes
+Model:
 
-| Route    | Flow                                                          | Trigger |
-|----------|---------------------------------------------------------------|---------|
-| routine  | Adapter → Deterministic → Qwen 27B → Schema Validation → Store | `requires_validation=false`, schema-valid |
-| questionable | Adapter → Deterministic → Qwen 27B → Granite 30B → Correct/Store | `requires_validation=true`, or Granite audit requested by policy |
-| hard     | Adapter → Deterministic → Qwen 27B → Granite 30B → Qwen 125B → Store or HUMAN_REVIEW | Granite objection with `severity=HIGH` AND `adjudication_required=true` |
-| visual   | Image → Qwen-VL → adequate? → Qwen 27B : (GLM-OCR → Qwen 27B) | image_document attachments |
+`qwen3.8:27b-mlx-menta-64k`
 
-## 3. Material-issue test (the 125B gate)
+Task:
 
-Qwen 125B is invoked **only** when ALL hold:
+Construct the strongest interpretation supported by the available evidence.
 
-1. Granite returned a material objection (`severity=HIGH`, `adjudication_required=true`),
-   or two independent evidence records conflict on a dossier-material field.
-2. The disputed issue is one of:
-   - difficult identity collision
-   - conflicting corporate identities
-   - manufacturer/trader dispute
-   - certificate/entity conflict
-   - disputed lot/report association
-   - complex cross-source contradiction
-   - unclear chain of custody
-   - high-impact unresolved relationship
-3. Resolving the issue would change the dossier (a field's stored value or state).
+Explicitly list:
 
-A LOW-confidence return from another worker is **not** an escalation trigger by itself.
-Escalation without a material issue is a contract violation and is counted in run metrics
-as `invalid_escalations`.
+- evidence supporting the interpretation
+- evidence that weakens it
+- assumptions required
+- unresolved gaps
 
-## 4. Adjudicator boundaries
+Do not conceal contradictory evidence.
 
-- The 125B resolves **only the disputed issue** — it never re-extracts the packet.
-- The original evidence outranks model opinions; model agreement is not evidence.
-- Output must use exactly one decision state from the 7 canonical states.
-- `human_review_required=true` routes to HUMAN_REVIEW; no automated overwrite.
+---
 
-## 5. Human review
+## Skeptic
 
-HUMAN_REVIEW is a terminal state for the run. The packet is stored with its conflict
-intact (never force-reconciled), listed in `unresolved_entities.csv` /
-`entity_conflicts.csv`, and queued in `followup_questions.csv`. Nothing in the pipeline
-may resolve it automatically afterward.
+Model:
 
-## 6. Non-goals
+`granite4.2:30b`
 
-This contract does not govern supplier contact, purchasing, or commerce. It governs
-evidence adjudication only.
+Task:
+
+Attempt to falsify or narrow the Resolver's interpretation.
+
+Look for:
+
+- unsupported assumptions
+- alternative explanations
+- source dependence
+- source-lineage duplication
+- mistaken entity merges
+- misleading apparent consensus
+- claim/fact conflation
+- missing evidence
+- wrong compound/lot association
+- unsupported manufacturer classification
+- chain-of-custody gaps
+
+Do not manufacture objections without evidence.
+
+---
+
+## Adjudicator
+
+Model:
+
+`qwen3.8-flash-next:125b-mlx`
+
+Task:
+
+Read:
+
+- the original evidence
+- deterministic metadata
+- Resolver analysis
+- Skeptic analysis
+
+Then determine the narrowest defensible conclusion.
+
+The panel must NOT vote.
+
+Agreement between models is not evidence.
+
+Original source material is evidence.
+
+---
+
+# ESCALATION CONDITIONS
+
+Invoke the full MoA only when a material unresolved issue remains after normal validation.
+
+Eligible examples:
+
+- ambiguous entity identity
+- alias collision
+- manufacturer/trader dispute
+- certificate/company mismatch
+- disputed corporate relationship
+- lot/report mismatch
+- contradictory analytical evidence
+- unclear chain of custody
+- source disagreement that materially affects the dossier
+- duplicated evidence with uncertain lineage
+- high-impact claim with incomplete support
+
+Do NOT escalate solely because:
+
+- extraction confidence is LOW
+- a record contains missing fields
+- a supplier uses WhatsApp
+- a report contains promotional language
+- evidence is sparse
+
+Sparse evidence can simply remain unresolved.
+
+---
+
+# FINAL DECISION CLASSES
+
+Use exactly one:
+
+- VERIFIED
+- LIKELY
+- POSSIBLE
+- UNVERIFIED
+- CONTRADICTED
+- UNRESOLVED
+- INSUFFICIENT_EVIDENCE
+
+Confidence:
+
+- HIGH
+- MEDIUM
+- LOW
+
+---
+
+# REQUIRED FINAL OUTPUT
+
+Issue:
+
+Decision:
+
+Confidence:
+
+Narrowest defensible conclusion:
+
+Supporting evidence:
+
+Contradicting evidence:
+
+Source-lineage considerations:
+
+Alternative explanations:
+
+Unresolved questions:
+
+Recommended evidence to obtain:
+
+Human review required:
+
+---
+
+# CORE PRINCIPLE
+
+When available evidence supports multiple plausible explanations, preserve the ambiguity.
+
+A high-quality unresolved result is better than a confident fabricated resolution.
+
+The 125B adjudicator exists to reason carefully about difficult evidence, not to force every case into a conclusion.
+
+---
+
+# IMPLEMENTATION NOTES (not part of the contract — see pcconnect/moa/panel.py)
+
+- The Escalation Router (deterministic code) opens the panel; workers never self-escalate.
+- Panel flow: Resolver (qwen27b, `prompts/moa_resolver.md`) → Skeptic (granite, compact
+  contract) → Adjudicator (125B, compact contract). The panel must NOT vote.
+- The MoA prompt files are split from this document by `scripts/split_prompts.py`
+  (`moa_resolver.md`; the Skeptic and Adjudicator runtime prompts already exist in
+  `prompts/granite30b_skeptic.md` and `prompts/qwen125b_adjudicator.md`).
+- Adjudicator output validates against `pcconnect/schemas/adjudication.schema.json`.

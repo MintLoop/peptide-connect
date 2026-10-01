@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "adjudication.schema.json",
+  "title": "MoA Adjudicator final output (MoA contract: REQUIRED FINAL OUTPUT)",
+  "description": "Exactly the contract's required fields. The panel must NOT vote; the adjudicator reads original evidence, deterministic metadata, Resolver analysis, and Skeptic analysis, then returns the narrowest defensible conclusion.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["issue", "decision", "confidence", "narrowest_defensible_conclusion", "supporting_evidence", "contradicting_evidence", "source_lineage_considerations", "alternative_explanations", "unresolved_questions", "recommended_evidence_to_obtain", "human_review_required"],
+  "properties": {
+    "issue": { "type": "string", "minLength": 1 },
+    "decision": { "type": "string", "enum": ["VERIFIED", "LIKELY", "POSSIBLE", "UNVERIFIED", "CONTRADICTED", "UNRESOLVED", "INSUFFICIENT_EVIDENCE"] },
+    "confidence": { "type": "string", "enum": ["HIGH", "MEDIUM", "LOW"] },
+    "narrowest_defensible_conclusion": { "type": "string", "minLength": 1 },
+    "supporting_evidence": { "type": "array", "items": { "type": "string" } },
+    "contradicting_evidence": { "type": "array", "items": { "type": "string" } },
+    "source_lineage_considerations": { "type": "array", "items": { "type": "string" } },
+    "alternative_explanations": { "type": "array", "items": { "type": "string" } },
+    "unresolved_questions": { "type": "array", "items": { "type": "string" } },
+    "recommended_evidence_to_obtain": { "type": "array", "items": { "type": "string" } },
+    "human_review_required": { "type": "boolean" }
+  }
+}

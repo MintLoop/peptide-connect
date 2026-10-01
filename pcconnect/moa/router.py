@@ -6,17 +6,32 @@ adjudication_required, a material-issue category, and dossier impact.
 """
 from ..adapters.base import utcnow_iso
 
-# Material issue categories (MoA contract §3)
-MATERIAL_ISSUES = {
-    "difficult_identity_collision",
-    "conflicting_corporate_identities",
+# Material issue categories eligible for MoA escalation (MoA contract §ESCALATION CONDITIONS)
+ELIGIBLE_ISSUES = {
+    "ambiguous_entity_identity",
+    "alias_collision",
     "manufacturer_trader_dispute",
-    "certificate_entity_conflict",
-    "disputed_lot_report_association",
-    "complex_cross_source_contradiction",
+    "certificate_company_mismatch",
+    "disputed_corporate_relationship",
+    "lot_report_mismatch",
+    "contradictory_analytical_evidence",
     "unclear_chain_of_custody",
-    "high_impact_unresolved_relationship",
+    "source_disagreement_affecting_dossier",
+    "duplicated_evidence_with_uncertain_lineage",
+    "high_impact_claim_with_incomplete_support",
 }
+
+# Reasons that are NEVER sufficient to escalate on their own (MoA contract)
+NON_ESCALATION_REASONS = [
+    "extraction confidence is low",
+    "missing fields",
+    "supplier uses whatsapp",
+    "promotional language",
+    "evidence is sparse",
+]
+
+# Legacy category aliases (kept so existing callers keep working)
+MATERIAL_ISSUES = ELIGIBLE_ISSUES
 
 ROUTE_CLASSES = ("routine", "questionable", "hard", "visual")
 

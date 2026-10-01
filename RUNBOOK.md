@@ -51,9 +51,14 @@ the idempotent stores prevent duplicate evidence (§18).
 ## Live-run escalation discipline
 
 - Routing: `pcconnect/moa/router.py` decides — workers never self-escalate.
-- The 125B gate (`gate_125b`) requires Granite HIGH-severity + adjudication_required
-  + material-issue category + dossier impact. Anything less routes to
-  correct-or-store, never the 125B.
+- The MoA panel (Resolver → Skeptic → Adjudicator) opens only when a material
+  unresolved issue remains after normal validation (`should_open_panel`,
+  `pcconnect/moa/panel.py`). Do-NOT-escalate: LOW confidence, missing fields,
+  WhatsApp usage, promotional language, sparse evidence.
+- The panel must NOT vote. Agreement between models is not evidence; original
+  source material is evidence. The 125B adjudicator returns the narrowest
+  defensible conclusion using the 7 decision classes — preserving ambiguity
+  when evidence supports multiple plausible explanations.
 - `human_review` events land in `run_events.jsonl` with the disputed issue; these
   are terminal for the run — resolve them by hand, never by re-running.
 
@@ -73,8 +78,9 @@ Run metrics land in `run_metrics.json`; per-model call/token metrics inside it.
 - **Schema failures > 2% on live runs** — the primary worker's contract prompt
   (`prompts/qwen27b_extraction.md`) plus retry hint handle most; persistent
   failures indicate a schema/prompt drift — regenerate schemas and re-run.
-- **125B invocations > 10% of records** — the gate is misconfigured or Granite is
-  over-objecting; inspect `run_events.jsonl` route reasons before anything else.
+- **125B invocations > 10% of records** — the MoA gate is misconfigured or Granite is
+  over-objecting; inspect `run_events.jsonl` route reasons and `moa_panel` events
+  before anything else.
 - **pymupdf missing** — in-vivo PDF text extraction is blocked; supply
   pre-extracted text via the fixture `text` field (adapter notes this).
 
