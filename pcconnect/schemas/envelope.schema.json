@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "envelope.schema.json",
+  "title": "Canonical Evidence Envelope",
+  "description": "Emitted by every source adapter before any LLM sees the data. The model layer never sees source-specific mechanics.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "source_type",
+    "source_record_id",
+    "retrieved_at",
+    "raw_content_hash",
+    "content",
+    "adapter_version"
+  ],
+  "properties": {
+    "source_type": {
+      "type": "string",
+      "enum": [
+        "janoshik",
+        "finnrick",
+        "peptidebenchmark",
+        "supplier_site",
+        "b2b_directory",
+        "whatsapp_export",
+        "telegram_export",
+        "pdf_document",
+        "image_document",
+        "regulatory_source",
+        "manual_evidence"
+      ]
+    },
+    "source_record_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "retrieved_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "raw_content_hash": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "content": {
+      "type": "object"
+    },
+    "attachments": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "filename": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "media_type": {
+            "type": "string"
+          },
+          "text_hash": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          }
+        }
+      }
+    },
+    "adapter_version": {
+      "type": "string"
+    }
+  }
+}

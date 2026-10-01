@@ -1,0 +1,165 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "analytical.schema.json",
+  "title": "Analytical Evidence Record (compound- and lot-specific)",
+  "description": "Never summarize 'supplier has sterility testing'. Every dimension is tracked per compound/lot; untested dimensions are never inferred as passed (tested=false, status stays UNVERIFIED).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "analytical_record_id",
+    "supplier_id",
+    "compound",
+    "laboratory",
+    "evidence_family_id",
+    "dimensions",
+    "provenance",
+    "sample_source",
+    "independence_status",
+    "source_id"
+  ],
+  "properties": {
+    "analytical_record_id": {
+      "type": "string",
+      "pattern": "^ANL-[0-9]{8}$"
+    },
+    "supplier_id": {
+      "type": "string",
+      "pattern": "^SUP-[0-9]{3}$"
+    },
+    "compound": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lot": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "laboratory": {
+      "type": "string"
+    },
+    "report_id": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidence_family_id": {
+      "type": "string",
+      "pattern": "^EF-[0-9]{8}$"
+    },
+    "dimensions": {
+      "type": "object",
+      "propertyNames": {
+        "enum": [
+          "identity",
+          "purity",
+          "quantity",
+          "endotoxin",
+          "sterility",
+          "heavy_metals",
+          "residual_solvents",
+          "water_content",
+          "counterion",
+          "contamination_screening",
+          "other"
+        ]
+      },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "tested": {
+            "type": "boolean"
+          },
+          "result": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "method": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "VERIFIED",
+              "LIKELY",
+              "POSSIBLE",
+              "UNVERIFIED",
+              "CONTRADICTED",
+              "UNRESOLVED",
+              "INSUFFICIENT_EVIDENCE"
+            ]
+          },
+          "report_ref": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^EV-[0-9]{8}$|^SRC-[0-9]{8}$"
+          }
+        },
+        "required": [
+          "tested",
+          "status"
+        ]
+      }
+    },
+    "provenance": {
+      "type": "string",
+      "enum": [
+        "PC_CONTROLLED_PURCHASE",
+        "INDEPENDENTLY_SOURCED",
+        "COMMUNITY_SUBMITTED",
+        "VENDOR_SUBMITTED",
+        "VENDOR_COA",
+        "AGGREGATOR_OBSERVED",
+        "UNKNOWN"
+      ]
+    },
+    "sample_source": {
+      "type": "string",
+      "enum": [
+        "vendor_submitted",
+        "independent",
+        "community",
+        "pc_controlled",
+        "unknown"
+      ]
+    },
+    "independence_status": {
+      "type": "string",
+      "enum": [
+        "INDEPENDENT",
+        "NOT_INDEPENDENT",
+        "UNKNOWN"
+      ]
+    },
+    "test_date": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "report_url": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-[0-9]{8}$"
+    },
+    "adapter_version": {
+      "type": "string"
+    }
+  }
+}

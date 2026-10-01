@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "observation.schema.json",
+  "title": "Append-Only Supplier Observation",
+  "description": "Historical claims are never overwritten. A superseded observation keeps its value and gains a superseded_by pointer.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "observation_id",
+    "entity_id",
+    "field",
+    "value",
+    "source_id",
+    "observed_at"
+  ],
+  "properties": {
+    "observation_id": {
+      "type": "string",
+      "pattern": "^OBS-[0-9]{8}$"
+    },
+    "entity_id": {
+      "type": "string",
+      "pattern": "^SUP-[0-9]{3}$|^ENT-[0-9]{3}$"
+    },
+    "field": {
+      "type": "string",
+      "minLength": 1
+    },
+    "value": {},
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-[0-9]{8}$"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "valid_from": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "superseded_by": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^OBS-[0-9]{8}$"
+    },
+    "confidence": {
+      "type": "string",
+      "enum": [
+        "HIGH",
+        "MEDIUM",
+        "LOW"
+      ]
+    },
+    "notes": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

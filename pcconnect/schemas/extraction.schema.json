@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "extraction.schema.json",
+  "title": "Primary Worker (Qwen 27B) extraction output",
+  "description": "What the extraction worker returns per evidence packet. Every assertion carries provenance; requires_validation routes to Granite (questionable).",
+  "type": "object",
+  "additionalProperties": true,
+  "required": ["extraction_id", "source_id", "assertions", "requires_validation"],
+  "properties": {
+    "extraction_id": {"type": "string", "pattern": "^EXT-[0-9]{6}$"},
+    "source_id": {"type": "string", "pattern": "^SRC-[0-9]{5}$"},
+    "assertions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "value", "status", "source_id", "source_type", "observed_at", "confidence"],
+        "additionalProperties": false,
+        "properties": {
+          "field": {"type": "string"},
+          "value": {},
+          "status": {"type": "string", "enum": ["CLAIMED", "OBSERVED", "VERIFIED", "PARTIALLY_VERIFIED", "CONTRADICTED", "UNKNOWN"]},
+          "source_id": {"type": "string"},
+          "source_type": {"type": "string"},
+          "observed_at": {"type": "string", "format": "date-time"},
+          "confidence": {"type": "string", "enum": ["HIGH", "MEDIUM", "LOW"]},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "requires_validation": {"type": "boolean"},
+    "escalation_reason": {"type": "string"},
+    "notes": {"type": "string"}
+  }
+}

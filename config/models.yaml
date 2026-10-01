@@ -1,0 +1,47 @@
+# Peptide Connect V0 — model routing table (Master Pack §11)
+# Endpoints: local Ollama OpenAI-compatible surface. No cloud providers.
+llm:
+  base_url: http://127.0.0.1:11434/v1
+  timeout_s: 300
+  max_retries: 2
+  temperature: 0.1
+
+models:
+  tier1_extraction:
+    model: qwen3.8:27b-mlx-menta-64k
+    role: primary extraction + normalization + dossier synthesis
+  tier1v_visual:
+    model: qwen3-vl:32b
+    role: visual evidence examination (never authenticity)
+  ocr_fallback:
+    model: glm-ocr:bf16
+    role: OCR only when visual extraction inadequate
+  embedding:
+    model: bge-m3:567m
+    role: entity candidate retrieval only (never identity proof)
+  tier2_validation:
+    model: granite4.2:30b
+    role: adversarial evidence skeptic
+  tier3_adjudication:
+    model: qwen3.8-flash-next:125b-mlx
+    role: exceptional hard-case adjudicator (material issues only)
+
+routing:
+  # Route classification thresholds (MoA contract §2-3)
+  questionable_triggers:
+    - requires_validation
+    - schema_retry_exhausted
+    - ambiguous_identity_signal
+  hard_triggers:  # 125B gate: ALL must hold (see contracts/MOA_CONTRACT.md §3)
+    - granite_objection_high_severity
+    - adjudication_required
+    - material_issue_category
+  material_issue_categories:
+    - difficult_identity_collision
+    - conflicting_corporate_identities
+    - manufacturer_trader_dispute
+    - certificate_entity_conflict
+    - disputed_lot_report_association
+    - complex_cross_source_contradiction
+    - unclear_chain_of_custody
+    - high_impact_unresolved_relationship

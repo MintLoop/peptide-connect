@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "lineage.schema.json",
+  "title": "Evidence Lineage Record",
+  "description": "One analytical evidence family, not three confirmations: a supplier page, an aggregator, and a directory all referencing the same Janoshik report share an evidence_family_id.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "evidence_id",
+    "source_id",
+    "evidence_family_id",
+    "recorded_at"
+  ],
+  "properties": {
+    "evidence_id": {
+      "type": "string",
+      "pattern": "^EV-[0-9]{8}$"
+    },
+    "source_id": {
+      "type": "string",
+      "pattern": "^SRC-[0-9]{8}$"
+    },
+    "upstream_source_id": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^SRC-[0-9]{8}$"
+    },
+    "evidence_family_id": {
+      "type": "string",
+      "pattern": "^EF-[0-9]{8}$"
+    },
+    "lineage_basis": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "recorded_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

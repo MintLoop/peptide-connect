@@ -1,0 +1,98 @@
+{
+  "completed_at": "2026-10-01T01:05:46Z",
+  "receipts": [
+    {
+      "worker": "entity_candidate_retriever",
+      "model": "bge-m3:567m",
+      "kind": "embeddings",
+      "status": "PASS",
+      "embedding_dims": 1024,
+      "elapsed_s": 16.3
+    },
+    {
+      "worker": "primary_extraction_worker",
+      "model": "qwen3.8:27b-mlx-menta-64k",
+      "kind": "chat",
+      "status": "PASS",
+      "content": "{\"ok\": true, \"worker\": \"qwen27b\"}",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 38,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens": 62,
+        "total_tokens": 100
+      },
+      "elapsed_s": 6.6
+    },
+    {
+      "worker": "evidence_skeptic",
+      "model": "granite4.2:30b",
+      "kind": "chat",
+      "status": "PASS",
+      "content": "",
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 37,
+        "prompt_tokens_details": {
+          "cached_tokens": 5
+        },
+        "completion_tokens": 64,
+        "total_tokens": 101
+      },
+      "elapsed_s": 3.0
+    },
+    {
+      "worker": "visual_examiner",
+      "model": "qwen3-vl:32b",
+      "kind": "chat",
+      "status": "PASS",
+      "content": "",
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 32,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens": 64,
+        "total_tokens": 96
+      },
+      "elapsed_s": 14.1
+    },
+    {
+      "worker": "ocr_fallback",
+      "model": "glm-ocr:bf16",
+      "kind": "chat",
+      "status": "PASS",
+      "content": "OK\n```markdown\n\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```\n```",
+      "finish_reason": "length",
+      "usage": {
+        "prompt_tokens": 26,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens": 64,
+        "total_tokens": 90
+      },
+      "elapsed_s": 2.6
+    },
+    {
+      "worker": "hard_case_adjudicator",
+      "model": "qwen3.8-flash-next:125b-mlx",
+      "kind": "chat",
+      "status": "PASS",
+      "content": "ADJUDICATOR_OK",
+      "finish_reason": "stop",
+      "usage": {
+        "prompt_tokens": 35,
+        "prompt_tokens_details": {
+          "cached_tokens": 0
+        },
+        "completion_tokens": 29,
+        "total_tokens": 64
+      },
+      "elapsed_s": 33.7
+    }
+  ]
+}
