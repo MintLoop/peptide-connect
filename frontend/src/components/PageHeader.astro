@@ -1,0 +1,24 @@
+---
+// src/components/PageHeader.astro
+// Consistent page header: eyebrow + title + lead, always wrapped in a shared
+// .container so it carries the same responsive horizontal gutter as every other
+// gutter (M1 fix: headings were rendered un-wrapped with zero horizontal
+// padding, so they sat flush against / clipped past the left viewport edge).
+// `uncontainer` opts out of the inner container for pages that wrap the header
+// in their own .container (e.g. the 404 page).
+interface Props { eyebrow?: string; title: string; lead?: string; center?: boolean; wide?: boolean; uncontainer?: boolean }
+const { eyebrow, title, lead, center = false, wide = false, uncontainer = false } = Astro.props;
+---
+<header class={`page-header${center ? ' center' : ''}${wide ? ' page-header--wide' : ''}`}>
+  {
+  uncontainer
+    ? <><p class="eyebrow">{eyebrow ?? ''}</p>
+        <h1>{title}</h1>
+        {lead && <p class="lead">{lead}</p>}</>
+    : <div class="container">
+      {eyebrow && <p class="eyebrow">{eyebrow}</p>}
+      <h1>{title}</h1>
+      {lead && <p class="lead">{lead}</p>}
+     </div>
+  }
+</header>

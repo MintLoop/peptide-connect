@@ -1,0 +1,21 @@
+---
+// src/components/DemoBanner.astro
+// Top-of-page DEMO posture banner. Dismissible client-side; sessionStorage
+// persists dismissal so it doesn't fight the user. Always rendered when DEMO
+// is true so no unverified claims slip through.
+//
+// (M2) Compact on phones: a short, single-line-ish disclosure so it never
+// occupies a large share of the initial mobile viewport. The full wording
+// lives in the catalog/coa callouts + homepage; the banner stays terse.
+
+import { site, DEMO } from '../config/site';
+---
+
+<div class="demo-banner" role="status" id="demo-banner">
+   <p class="demo-banner__text">
+     <strong>DEMO build</strong> — demo catalog, suppliers, and order data. No real products, prices, COAs, or customer data are shown.
+   </p>
+   <button class="demo-banner__close" aria-label="Dismiss demo notice" id="demo-banner-close">
+     &times;
+   </button>
+</div>

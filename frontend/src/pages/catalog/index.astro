@@ -1,0 +1,87 @@
+---
+// src/pages/catalog/index.astro — Searchable, filterable catalog.
+// DEMO data, clearly labeled. Client-side progressive enhancement (app.js).
+import Base from '../../layouts/Base.astro';
+import PageHeader from '../../components/PageHeader.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { PRODUCTS, allFamilies, CATALOG_META } from '../../data/catalog';
+
+const families = allFamilies();
+---
+<Base title="Catalog">
+ <PageHeader
+   eyebrow="Catalog"
+   title="Research compound catalog"
+   lead="A searchable, filterable catalog. Every product, supplier, and COA record shown here is DEMO data — no real compound, lot, or purity is represented." />
+
+ <section class="section section--tight">
+   <div class="container">
+
+     <div class="callout callout--demo" style="margin-bottom:var(--space-6);">
+       <div class="callout__title">
+        <span class="badge badge--demo">DEMO</span> Demo catalog · {CATALOG_META.total} items
+       </div>
+       <p style="margin:0;">{CATALOG_META.note} Data dated {CATALOG_META.dataDate}. '
+       'Pricing is inquiry-only across all demo items; no real COA purity is shown.</p>
+     </div>
+
+     <!-- Filter bar -->
+     <div id="catalog-filter"
+        class="card"
+        style="
+          display:grid;gap:var(--space-4);margin-bottom:var(--space-6);
+          grid-template-columns:2fr 1fr 1fr;
+        "
+        data-filter>
+       <div class="field" style="margin:0;">
+         <label for="catalog-search">Search</label>
+         <input id="catalog-search" type="search"
+            placeholder="Search by name or compound…"
+            autocomplete="off" />
+       </div>
+       <div class="field" style="margin:0;">
+         <label for="catalog-family">Family</label>
+         <select id="catalog-family">
+          <option value="">All families</option>
+          {
+           families.map(f => <option value={f}>{f}</option>)
+          }
+        </select>
+       </div>
+       <div class="field" style="margin:0;">
+         <label for="catalog-status">Availability</label>
+         <select id="catalog-status">
+          <option value="">All</option>
+          <option value="available">Available</option>
+          <option value="inquire">Inquire</option>
+          <option value="not_available">Not available</option>
+         </select>
+       </div>
+     </div>
+
+     <div id="catalog-grid-wrap">
+       <div id="catalog-grid" class="grid grid--3">
+         {
+          PRODUCTS.map(p => <ProductCard product={p} />)
+         }
+       </div>
+     </div>
+
+     <p id="catalog-empty"
+        class="empty"
+        style="margin-top:var(--space-6);display:none;">
+       <h3>No products match your filters</h3>
+       <p>
+        Clear the filters or adjust your search. In this demo catalog, '
+        '<a href="/catalog">reset the filters</a> to see all items.
+       </p>
+     </p>
+   </div>
+ </section>
+</Base>
+
+<style>
+     @media (max-width: 860px) {
+      #catalog-filter { grid-template-columns: 1fr; }
+     }
+</style>

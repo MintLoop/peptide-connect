@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.astro/
+Derailed/
+*.log
+.DS_Store
+.env
+.env.*
+!.env.example
+
+# Phase B: the approved brand kit lives in the source pipeline repo; we copy its
+# rasters into public/brand/. This is provenance, not a build artifact to ignore.
+# .env holds NO real secrets in Phase B (no backend); keep it out of git anyway.

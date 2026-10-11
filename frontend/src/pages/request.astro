@@ -1,0 +1,154 @@
+---
+// src/pages/request.astro — Request / order shell.
+// Frontend shell only: no live payment, no backend submission. The client
+// script shows a DEMO confirmation (no data leaves the browser). Phase C wires
+// a real multi-step cart → review → confirm → human-confirmation → tracking code.
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { PRODUCTS } from '../data/catalog';
+---
+<Base title="Request an order">
+  <PageHeader
+   eyebrow="Request a compound"
+   title="Request an order"
+   lead="Browse, add items, and request. A human reviews every order; nothing is auto-fulfilled and no payment is processed in this build."
+  />
+   <section class="section section--tight">
+      <div class="container" style="max-width:760px;">
+
+        <!-- Request journey: a coherent 4-step customer path (M3) -->
+        <ol class="journey" aria-label="Request journey">
+         <li><span class="journey__n">1</span><div><strong>Browse</strong><p class="muted" style="margin:.25rem 0 0;">Find a compound in the catalog.</p></div></li>
+         <li><span class="journey__n">2</span><div><strong>Request</strong><p class="muted" style="margin:.25rem 0 0;">Add it and submit your details.</p></div></li>
+         <li><span class="journey__n">3</span><div><strong>Human confirms</strong><p class="muted" style="margin:.25rem 0 0;">We review and confirm availability.</p></div></li>
+         <li><span class="journey__n">4</span><div><strong>Track</strong><p class="muted" style="margin:.25rem 0 0;">Follow status by a PII-free code.</p></div></li>
+        </ol>
+
+        <p
+         id="request-prefill"
+         class="callout callout--info"
+         style="display:none;"
+        ></p>
+
+        <div class="callout callout--warn" style="margin-bottom:var(--space-6);">
+          <div class="callout__title">
+           <span class="badge badge--demo">DEMO</span> No live payment · shell only
+          </div>
+          <p style="margin:0;">
+          This is a request form shell. It does <strong>not</strong> process payment,
+            create an order, or send email. Submitting shows a local confirmation only.
+          </p>
+        </div>
+
+        <!-- Your request: line items + a live summary, as a coherent journey (M3) -->
+        <h2 style="margin-top:var(--space-7);">Your request</h2>
+        <div class="card" style="margin-bottom:var(--space-5);">
+          <div class="flex justify-between items-center" style="margin-bottom:var(--space-4);">
+           <h3 style="margin:0;">Line items</h3>
+           <span class="badge badge--demo">DEMO</span>
+          </div>
+          <table class="data">
+           <thead>
+            <tr>
+             <th>Compound (DEMO)</th>
+             <th>Variant</th>
+            <th>Qty</th>
+            </tr>
+          </thead>
+          <tbody id="cart-body">
+           <tr>
+            <td colspan="3" class="muted">
+             No items yet. Add a compound below.
+            </td>
+           </tr>
+          </tbody>
+        </table>
+        <p class="muted" style="font-size:var(--fs-xs);">
+          In Phase C this cart is editable (add / remove / quantity) and persists
+         server-side per request.
+        </p>
+
+        <!-- Requester details -->
+        <form id="request-form" class="stack" style="gap:var(--space-5);">
+          <h2>Contact details</h2>
+          <div class="form-row">
+            <div class="field">
+             <label for="req-name">Full name</label>
+             <input id="req-name" name="name" type="text" autocomplete="name"
+                placeholder="Demo only — not submitted" />
+            </div>
+            <div class="field">
+             <label for="req-email">Email</label>
+             <input id="req-email" name="email" type="email"
+                autocomplete="email" placeholder="you@example.com" />
+            </div>
+          </div>
+          <div class="form-row">
+           <div class="field">
+            <label for="req-compound">Compound</label>
+            <select id="req-compound" name="product">
+             <option value="">Select a compound…</option>
+             {
+              PRODUCTS.map(p =>
+                <option value={p.slug}>{p.name} ({p.family})</option>
+               )
+              }
+            </select>
+           </div>
+           <div class="field">
+            <label for="req-qty">Quantity</label>
+            <input id="req-qty" name="qty" type="number" min="1" value="1" />
+           </div>
+          </div>
+          <div class="field">
+           <label for="req-notes">Notes (research context)</label>
+           <textarea id="req-notes" name="notes"
+             placeholder="Describe the research context, intended use, or questions. Research use only."></textarea>
+          </div>
+
+          <!-- Consent: 21+ / research-use only (never a health claim) -->
+          <div>
+            <label class="checkbox">
+             <input type="checkbox" required />
+             <span>I confirm I am 21 or older and this request is for laboratory
+            research use only — not for human or veterinary consumption.</span>
+            </label>
+            <label class="checkbox">
+             <input type="checkbox" required />
+             <span>I understand this is a request, not a sale. A human will review
+             it and there is no live payment in this build.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn--primary btn--block">
+           Submit request
+          </button>
+
+          <p id="request-notice-slot">
+           <!-- client inserts the DEMO notice here on submit -->
+          </p>
+          </form>
+
+          <!-- Request summary: a coherent "what happens next" + where payment
+            would be configured, without exposing any real payment detail. -->
+          <section class="request-summary card" style="margin-top:var(--space-6);">
+            <div class="flex justify-between items-center" style="margin-bottom:var(--space-4);">
+             <h3 style="margin:0;">Request summary</h3>
+             <span class="badge badge--demo">DEMO</span>
+            </div>
+            <dl class="summary-grid">
+             <dt class="muted-strong">Status</dt><dd>Configuration-ready — no live order or payment in this build</dd>
+             <dt class="muted-strong">Order type</dt><dd>Inquiry (human-confirmed, not a sale)</dd>
+             <dt class="muted-strong">Payment</dt><dd>Not processed — seller configures a method in Phase C</dd>
+            </dl>
+            <p class="muted" style="font-size:var(--fs-xs);margin-top:var(--space-4);margin-bottom:0;">
+            Payment is intentionally a <strong>configuration-ready placeholder</strong>.
+            In Phase C the seller enables a chosen method (card processing, bank
+            transfer, or similar) per order. No card details, crypto addresses,
+            wallets, or payment instructions are shown or stored in this DEMO shell.
+            </p>
+          </section>
+        </div>
+      </div>
+    </section>
+</Base>

@@ -1,0 +1,138 @@
+---
+// src/pages/coa.astro — COA / Lot Verification Explorer (feature-flagged).
+// HONEST EMPTY STATES: no COA data is fabricated. Every record is "no_record"
+// or "pending" — the explorer shows what is known (nothing verified yet) and
+// states explicitly when there is no COA. Schema-aligned to the pipeline's
+// analytical/dossier/lineage schemas (referenced, not imported — see PHASE_C).
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { DEMO_COA } from '../data/catalog';
+
+// Feature flag. Off by default until a verified COA store exists (Phase C).
+// When off, the explorer renders the honest "none yet" state but still shows
+// the DEMO ledger so the shape is reviewable.
+const COA_EXPLORER_ENABLED = true;
+
+const statusLabel = (s: string) =>
+   s === 'no_record' ? 'No record'
+    : s === 'pending' ? 'Requested — awaiting lab'
+    : s === 'unverified' ? 'Unverified'
+    : s;
+---
+<Base title="COA Explorer" noIndex>
+ <PageHeader
+   eyebrow="Feature-flagged · DEMO"
+   title="COA / Lot Verification Explorer"
+   lead="Search certificates of analysis by compound, lot, or supplier. This is the honesty layer: it shows what is verified, what is requested, and what is unknown — never a fabricated pass."
+/>
+ <section class="section section--tight">
+     <div class="container">
+
+       <div class="callout callout--warn" style="margin-bottom:var(--space-6);">
+         <div class="callout__title">
+          <span class="badge badge--demo">DEMO</span> No COA data is fabricated
+         </div>
+         <p style="margin:0;">
+        Every record below is a <strong>honest empty/pending state</strong>.
+          No purity, lab, lot, or date values are invented. When a real COA is
+          published, it is schema-aligned to the pipeline's
+          <code class="mono">analytical</code> / <code class="mono">dossier</code> /
+            <code class="mono">lineage</code> schemas and linked here.
+         </p>
+       </div>
+
+       <!-- Search -->
+       <div class="card" style="margin-bottom:var(--space-6);">
+        <div class="field" style="margin:0;">
+          <label for="coa-search">Search COAs (compound / lot / supplier)</label>
+          <input id="coa-search" type="search" placeholder="Search the demo ledger…"
+           autocomplete="off" />
+        </div>
+       </div>
+
+       {
+     !COA_EXPLORER_ENABLED &&
+        <div id="coa-feature-off" class="empty" style="margin-bottom:var(--space-6);">
+          <h3>Explorer is not yet live</h3>
+          <p>
+         The COA Explorer is feature-flagged off until a verified COA store
+           exists. The demo ledger below is shown so the shape is reviewable.
+          </p>
+        </div>
+      }
+
+      <!-- Ledger -->
+      <div id="coa-results">
+        <div class="table-wrap card" style="padding:0;">
+          <table class="data">
+           <thead>
+            <tr>
+             <th>Compound</th>
+             <th>Lot</th>
+             <th>Supplier</th>
+             <th>Status</th>
+            <th>What is known</th>
+            </tr>
+        </thead>
+         <tbody>
+          {
+          DEMO_COA.map(r =>
+            <tr data-coa-row data-compound={r.compound} data-lot={r.lotNumber ?? ''}>
+              <td class="mono">{r.compound}</td>
+              <td class="muted">{r.lotNumber ? r.lotNumber : '— none on file —'}</td>
+              <td class="muted">
+              {r.status === 'pending' ? 'Demo Supplier North' : '— not linked —'}
+              </td>
+              <td>
+                <span class={`badge ${
+                    r.status === 'no_record' ? 'badge--not-available'
+                    : r.status === 'pending' ? 'badge--inquire'
+                    : 'badge--demo'
+                  }`}>
+                 {statusLabel(r.status)}
+                </span>
+                </td>
+              <td class="muted" style="font-size:var(--fs-xs);">{r.note}</td>
+             </tr>
+            )
+          }
+          </tbody>
+          </table>
+        </div>
+
+        <p id="coa-empty-results"
+          class="empty"
+          style="margin-top:var(--space-6);display:none;">
+          <h3>No COA records match your search</h3>
+          <p>
+        No certificate of analysis in the ledger matches your search. A different
+          lot would need its own independent verification — absence here is not a
+           passed result.
+          </p>
+        </p>
+      </div>
+
+       <!-- Honest explainer -->
+       <div class="grid grid--2" style="margin-top:var(--space-7);">
+         <div class="card">
+           <h3 style="margin-top:0;">What "no COA" means</h3>
+           <p class="muted" style="margin:0;">
+          A "no record" status is a successful, honest outcome. It means we have
+            not yet obtained an independent certificate for that lot. We do not
+            infer a pass, and we do not fill the gap with a fabricated value.
+           </p>
+         </div>
+         <div class="card">
+           <h3 style="margin-top:0;">How verification will work</h3>
+           <p class="muted" style="margin:0;">
+          Each COA (Phase C) records compound, lot, purity, assay method, issuing
+            lab, date, and chain-of-custody, schema-aligned to the pipeline and
+            labeled <code class="mono">VENDOR_COA</code> vs
+            <code class="mono">INDEPENDENTLY_SOURCED</code>. Self-reported
+            testing is never shown as independent evidence.
+          </p>
+         </div>
+       </div>
+     </div>
+   </section>
+</Base>

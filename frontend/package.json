@@ -1,0 +1,28 @@
+{
+  "name": "peptide-connect-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Peptide Connect - research-first, verifiable peer network for the research-peptide market. Static shell (Astro + React islands) with a hand-crafted design-token system. No production backend, no live payment, no fabricated data (Phase B).",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "gen:svg": "node scripts/build-logo-svgs.mjs",
+    "gen:favicon": "node scripts/render-favicon.mjs",
+    "gen:all": "npm run gen:svg && npm run gen:favicon"
+   },
+  "dependencies": {
+    "@astrojs/react": "^4.2.0",
+    "astro": "^5.2.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+   },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.6.0"
+   }
+}

@@ -1,0 +1,162 @@
+---
+// src/pages/catalog/[slug].astro — Product detail page (static generation).
+// DEMO-safe COA gate: the COA block only renders a "COA on file" link when
+// coaAvailable is true; otherwise an honest empty state. No fabricated data.
+import Base from '../../layouts/Base.astro';
+import BrandMark from '../../components/BrandMark.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import { findProduct, PRODUCTS } from '../../data/catalog';
+
+export async function getStaticPaths() {
+   return PRODUCTS.map(p => ({ params: { slug: p.slug } }));
+}
+
+const { slug } = Astro.params;
+const product = findProduct(slug as string);
+
+if (!product) {
+   Astro.redirect('/catalog?notfound=1');
+}
+---
+<Base title={product!.name} noIndex={product!.status === 'not_available'}>
+ <section class="section section--tight">
+    <div class="container">
+      <nav class="flex gap-2" aria-label="Breadcrumb" style="font-size:var(--fs-sm);
+           color:var(--muted);margin-bottom:var(--space-5);">
+        <a href="/catalog">Catalog</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{product!.name}</span>
+      </nav>
+
+      <div class="grid product-layout">
+
+        <!-- Main -->
+        <div class="stack" style="gap:var(--space-6);">
+          <div>
+           <div class="flex items-center gap-2" style="margin-bottom:var(--space-3);">
+             <StatusBadge status={product!.status} />
+             {product!.coaAvailable
+               ? <span class="badge badge--available">COA on file</span>
+               : <span class="badge badge--demo">No COA published yet</span>}
+             {product!.draftFlag && <span class="badge badge--draft">Draft</span>}
+           </div>
+           <h1 style="margin:0;">{product!.name}</h1>
+           <p class="mono muted" style="font-size:var(--fs-md);">
+            {product!.compound}
+           </p>
+          </div>
+
+          <p>{product!.description}</p>
+
+          <!-- Editable spec block (rendered as data, not as claims) -->
+          <div>
+            <h2>Specifications</h2>
+            <div class="card table-wrap">
+              <table class="data">
+               <tbody>
+                 <tr><th>Compound family</th><td>{product!.family}</td></tr>
+                <tr><th>Form</th><td>{product!.form}</td></tr>
+                 <tr><th>Route (research context)</th><td>{product!.route}</td></tr>
+                 <tr>
+                   <th>Availability</th>
+                   <td>
+                    <StatusBadge status={product!.status} />
+                   </td>
+                 </tr>
+                 <tr>
+                   <th>Certificate of analysis</th>
+                   <td>
+                     {
+                    product!.coaAvailable
+                      ? 'COA available for the current lot. (DEMO — link to be wired in Phase C.)'
+                      : 'No COA published for this lot yet. This is an honest empty state — not a passed result.'
+                   }
+                   </td>
+                 </tr>
+               </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- COA gate -->
+          <div>
+            <h2>Certificate of analysis</h2>
+            {
+             product!.coaAvailable
+               ? <div class="callout callout--info">
+                  <div class="callout__title">COA on file (DEMO)</div>
+                  <p style="margin:0;">
+                    A certificate record exists for this product. In Phase C this '
+                    'links to a verified, lab-issued COA with lot, purity, method, '
+                    'and chain-of-custody. No COA data is fabricated in this build.
+                  </p>
+                </div>
+               : <div class="callout">
+                  <div class="callout__title">
+                    <BrandMark variant="mono" size={20} label="" />
+                    No COA published yet
+                  </div>
+                  <p style="margin:0;">
+                    There is no certificate of analysis on file for {product!.name}. '
+                    'A different or later lot would need its own independent '
+                    'verification. Absence of a COA record is shown honestly; it is '
+                    'not treated as a passed test.
+                  </p>
+                 </div>
+            }
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="stack product-aside">
+          <div class="card">
+            <h3 style="margin-top:0;">Variants</h3>
+            <ul style="list-style:none;padding:0;margin:0;display:flex;
+                       flex-direction:column;gap:.5rem;">
+              {
+              product!.variants.map(v =>
+                 <li class="flex items-center justify-between gap-2"
+                    style="padding:.5rem 0;border-bottom:1px solid var(--line-soft);">
+                     <span class="mono">{v.label}</span>
+                     {v.status === 'coming_soon'
+                       ? <span class="muted" style="font-size:var(--fs-xs);">Coming soon</span>
+                       : <span class="badge badge--demo">DEMO</span>
+                    }
+                  </li>
+                )
+            }
+           </ul>
+            <p class="muted" style="font-size:var(--fs-xs);margin-top:var(--space-3);">
+               Pricing is inquiry-only across all demo variants. No real prices shown.
+             </p>
+           </div>
+           <a class="btn btn--primary btn--block" href={`/request?product=${product!.slug}`}>
+            Request {product!.name}
+            </a>
+           <p class="muted" style="font-size:var(--fs-xs);">
+             For laboratory research use only. Not for human or veterinary consumption.
+           </p>
+          </div>
+        </aside>
+      </div>
+    </div>
+   </section>
+  </Base>
+
+<style>
+   /* Product detail: 2-col on desktop, collapses to a single column on narrow
+      viewports so nothing overflows the viewport (M1). Previously the
+      1.3fr .7fr grid never collapsed → +221px horizontal overflow at 320px. */
+ .product-layout {
+  display: grid;
+  grid-template-columns: 1.3fr .7fr;
+  gap: var(--space-7);
+  align-items: start;
+ }
+ .product-aside { gap: var(--space-5); position: sticky; top: 80px; }
+ @media (max-width: 860px) {
+  .product-layout { grid-template-columns: 1fr; gap: var(--space-5); }
+  .product-aside { position: static; }
+  .product-aside .card { position: sticky; top: 76px; }
+ }
+ </style>

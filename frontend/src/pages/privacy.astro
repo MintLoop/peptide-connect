@@ -1,0 +1,22 @@
+---
+import EditPage from '../components/EditPage.astro';
+import { site } from '../config/site';
+---
+<EditPage
+    eyebrow="Legal"
+    title="Privacy"
+    lead="How Peptide Connect handles data. In Phase C this becomes the full policy and is finalized by the owner."
+      >
+        <p>
+         Peptide Connect is committed to PII minimization. In a live phase,
+          requests collect the minimum required to route and confirm an inquiry,
+           access is server-authenticated, and data is retained only as long as
+            needed.
+             </p>
+        <p>
+         In this DEMO build, <strong>no personal data is collected or transmitted</strong>.
+          Form submissions are handled locally in the browser and discarded; nothing
+           reaches a server.
+            </p>
+                 <p class="muted">Last reviewed: DEMO · entity: {site.legal.entity}.</p>
+    </EditPage>

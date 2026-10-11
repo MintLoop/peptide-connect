@@ -1,0 +1,62 @@
+---
+// src/pages/order.astro — Order status placeholder.
+// Demo: lookup by tracking code returns an honest "not found" — no fabricated
+// order data, no PII. Phase C serves a real PII-free status endpoint.
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+<Base title="Order status">
+ <PageHeader
+   eyebrow="Track an order"
+   title="Order status"
+   lead="Enter a tracking code to check status. This build is a frontend placeholder: codes are not real and no order data is stored."
+  />
+
+  <section class="section section--tight">
+    <div class="container" style="max-width:720px;">
+
+     <div class="callout callout--demo" style="margin-bottom:var(--space-6);">
+        <div class="callout__title">
+         <span class="badge badge--demo">DEMO</span> Placeholder status lookup
+        </div>
+        <p style="margin:0;">
+        In Phase C, a submitted request returns a unique, non-guessable
+        <code class="mono">tracking code</code>. This page then shows a
+         PII-free status (steps, next update) from the backend.
+        </p>
+      </div>
+
+      <form id="order-search" class="flex gap-3 wrap"
+        style="align-items:flex-end;">
+        <div class="field" style="flex:1 1 240px;margin:0;">
+          <label for="order-code">Tracking code</label>
+          <input id="order-code" name="code" type="text"
+            class="mono" placeholder="e.g. A3F9K7 (demo — not real)"
+            autocomplete="off" />
+        </div>
+        <button type="submit" class="btn btn--primary">Check status</button>
+      </form>
+
+      <div id="order-result" style="margin-top:var(--space-6);"
+        aria-live="polite">
+        <div class="empty">
+          <h3>No lookup yet</h3>
+          <p>
+          Enter a tracking code above. In this demo, every code returns
+            “not found” — there are no real orders to look up.
+          </p>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:var(--space-6);">
+        <h3 style="margin-top:0;">What you'll see in Phase C</h3>
+        <ol style="padding-left:1.1rem;color:var(--ink-2);">
+          <li>a status stepper: <code class="mono">Received → Confirmed → Ready →
+             Shipped → Closed</code></li>
+        <li>a masked order identifier (no name / address / email exposed)</li>
+          <li>the next expected update and a timestamp of each transition</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+</Base>

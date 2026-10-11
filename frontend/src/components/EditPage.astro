@@ -1,0 +1,24 @@
+---
+// Editable content page shell. Phase B renders these from inline content and
+// shows a "DRAFT — pending owner review" flag. Phase C makes them admin-editable.
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { DEMO } from '../config/site';
+
+interface Props {
+  eyebrow?: string;
+  title: string;
+  lead?: string;
+}
+const { eyebrow, title, lead } = Astro.props;
+---
+<Base title={title}>
+ <PageHeader eyebrow={eyebrow} title={title} lead={lead} />
+ <section class="section section--tight">
+       <div class="container container--narrow">
+         {DEMO &&
+          <p class="badge badge--draft" style="margin-bottom:var(--space-4);">Draft — pending owner review</p>}
+         <slot />
+       </div>
+     </section>
+</Base>

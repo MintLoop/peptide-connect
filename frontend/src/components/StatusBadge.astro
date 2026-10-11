@@ -1,0 +1,13 @@
+---
+// src/components/StatusBadge.astro
+// Availability status badge. Research/posture-safe: never a price-purity claim.
+interface Props { status: string }
+const { status } = Astro.props;
+const label =
+  status === 'available' ? 'Available'
+  : status === 'inquire' ? 'Inquire'
+  : status === 'not_available' ? 'Not available'
+  : status;
+---
+<span class={`badge badge--${status === 'not_available' ? 'not-available' : status}`}
+      data-status={status}>{label}</span>

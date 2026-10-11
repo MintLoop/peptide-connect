@@ -1,0 +1,283 @@
+---
+// src/pages/index.astro — Homepage (Phase B.1: seller-first storefront)
+// Structure per Phase B.1 M3: product-focused hero → prominent Browse catalog CTA →
+// featured demo products → the request/confirmation process → COA / research
+// transparency (supporting) → FAQ + contact. No health/dosing/purity claims.
+// DEMO posture via the persistent demo banner + per-section DEMO labels.
+import Base from '../layouts/Base.astro';
+import BrandMark from '../components/BrandMark.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { site, DEMO } from '../config/site';
+import { PRODUCTS, CATALOG_META } from '../data/catalog';
+
+const featured = PRODUCTS.slice(0, 4);
+
+const steps = [
+   {
+    n: '01',
+    title: 'Browse & discover',
+    body: 'Explore a clearly-labeled catalog of research compounds with the ' +
+      'verification status of each — no unverified purity or clinical claims.',
+    },
+    {
+    n: '02',
+    title: 'Request, then confirm',
+    body: 'Add a compound and request it. A human reviews every order; nothing ' +
+      'is auto-fulfilled and no payment is processed in this build.',
+    },
+    {
+    n: '03',
+    title: 'Track by code',
+    body: 'Receive a unique, PII-free tracking code and follow your order ' +
+      'through to the next step.',
+    },
+];
+
+const coaPoints = [
+    {
+    title: 'COA / Lot Verification Explorer',
+    body: 'Search certificates of analysis by compound, lot, or supplier. It ' +
+      'shows what is verified, what is requested, and what is still unknown — ' +
+      'never a fabricated pass.',
+    },
+    {
+    title: 'Honest empty states',
+    body: 'Absent a COA, we say so. "No record yet" is a successful, honest ' +
+       'outcome — not a fabricated result, and not a quiet downgrade of a claim.',
+    },
+    {
+    title: 'Claims are not facts',
+    body: 'Vendor-submitted testing is recorded separately from independently ' +
+       'sourced evidence. A claim is never quietly converted into a verified fact.',
+    },
+];
+---
+<Base>
+    <!-- 1. Product-focused hero with a prominent Browse catalog CTA -->
+     <section class="hero" style="
+      background: radial-gradient(120% 120% at 80% 0%, #1a4653 0%, var(--navy) 60%);
+      color: var(--on-dark);
+      padding: clamp(3rem, 8vw, 6rem) 0;">
+       <div class="container hero__grid">
+         <div class="hero__copy">
+           <p class="eyebrow hero__eyebrow">Evidence-first · Research peptide catalog</p>
+           <h1 class="hero__title">
+            A transparent catalog for the research-peptide market.
+           </h1>
+           <p class="lead hero__lead">
+            {site.name} turns scattered lab reports, supplier COAs, and directory
+             entries into structured, provenance-backed evidence — so you can
+             compare what is claimed, what is independently verified, and what is
+             still unknown before you request a compound.
+           </p>
+           <div class="hero__actions">
+            <a class="btn btn--on-dark btn--lg" href="/catalog">Browse catalog</a>
+            <a class="btn hero__btn-ghost btn--lg" href="/coa">COA Explorer</a>
+           </div>
+           {
+          DEMO &&
+             <p class="hero__demo">
+               <span class="badge badge--demo">DEMO BUILD</span> Clearly-labeled demo
+             data — no real products, prices, or COAs.
+             </p>
+           }
+         </div>
+
+         <!-- Frozen constellation mark on dark, as the hero focal point.
+           Inline so the entrance animation can draw its 5 strokes + 4 nodes
+           (geometry read from the approved SVG file — never mutated). -->
+          <div class="hero__mark-wrap">
+           <BrandMark variant="reversed" size={260}
+          class="hero__mark"
+          inline
+          label={`${site.shortName} constellation mark`} />
+          </div>
+       </div>
+     </section>
+
+     <!-- 2 + 3. Featured demo product cards + request/confirmation process -->
+     <section class="section" id="catalog-preview">
+        <div class="container">
+          <div class="section-head">
+           <div>
+            <p class="eyebrow">Featured compounds</p>
+            <h2>Browse the catalog</h2>
+           </div>
+           <a class="btn btn--ghost" href="/catalog">View full catalog →</a>
+          </div>
+          <p class="muted" style="max-width:60ch; margin-top:0;">
+           {CATALOG_META.total} demo compounds. Every product, variant, and COA
+            record below is <strong>DEMO</strong> data (dated {CATALOG_META.dataDate}). '
+           'Pricing is inquiry-only; no real purity or COA is shown.
+          </p>
+          <div class="grid grid--2 catalog-grid" style="margin-top:var(--space-6);">
+           {
+          featured.map(p => <ProductCard product={p} />)
+          }
+          </div>
+         </div>
+       </section>
+
+       <section class="section how-section" style="background:var(--surface);">
+          <div class="container">
+            <div class="center" style="margin-bottom:var(--space-7);">
+              <p class="eyebrow">How requests work</p>
+              <h2>From discovery to a reviewable request</h2>
+              <p class="lead" style="margin-inline:auto;">
+               A clear customer journey: browse, request, and track — with
+                verification honesty at every step and a human on every order.
+              </p>
+            </div>
+            <div class="grid grid--3">
+             {
+            steps.map(s =>
+                <div class="card how-card">
+                  <span class="mono how-card__n">{s.n}</span>
+                  <h3 style="margin:0;">{s.title}</h3>
+                  <p class="muted" style="margin:0;">{s.body}</p>
+                </div>
+             )
+            }
+            </div>
+            <div class="center" style="margin-top:var(--space-7);">
+             <a class="btn btn--primary btn--lg" href="/request">Start a request</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. Research documentation + COA transparency (supporting) -->
+        <section class="section" id="verification">
+           <div class="container">
+             <div class="center" style="margin-bottom:var(--space-7);">
+               <p class="eyebrow">Research documentation</p>
+               <h2>Verification over marketing</h2>
+               <p class="lead" style="margin-inline:auto;">
+                {site.name} is a research tool, not a lab: it surfaces provenance,
+                 keeps claims separate from facts, and shows honest empty states.
+                No health, safety, or efficacy claims are made.
+               </p>
+             </div>
+             <div class="grid grid--3 coa-grid">
+              {
+             coaPoints.map(c =>
+                 <div class="card">
+                   <h3 style="margin-top:0;">{c.title}</h3>
+                   <p class="muted" style="margin:0;">{c.body}</p>
+                 </div>
+             )
+              }
+            </div>
+            <div class="center" style="margin-top:var(--space-6);">
+             <a class="btn btn--ghost btn--lg" href="/coa">Open the COA Explorer</a>
+            </div>
+          </div>
+        </section>
+
+        <!-- 6. FAQ + contact -->
+        <section class="section section--tight help-section">
+           <div class="container container--narrow center">
+            <h2>Questions?</h2>
+            <p class="lead" style="margin-inline:auto;margin-bottom:var(--space-6);">
+             Everything below is answered in a DEMO build — no live forms, no
+              email. Reach the right place:
+            </p>
+            <div class="cta-row">
+              <a class="btn btn--ghost" href="/faq">Read the FAQ</a>
+              <a class="btn btn--ghost" href="/contact">Contact us</a>
+              <a class="btn btn--primary" href="/request">Request an order</a>
+            </div>
+           </div>
+        </section>
+
+       <!-- Research-posture callout: never implies safety/efficacy -->
+       <section class="section section--tight">
+          <div class="container">
+           <div class="callout callout--info">
+            <div class="callout__title">Research use only</div>
+            <p style="margin:0;">
+             {site.researchDisclaimer} {site.name} does not provide medical
+              advice, diagnosis, or treatment recommendations.
+            </p>
+           </div>
+          </div>
+       </section>
+      </Base>
+
+<style>
+     /* Hero — desktop 2-column (copy | mark); collapses to a centered single
+       column on narrow viewports (M1). */
+ .hero__grid {
+  display: grid;
+  gap: var(--space-8);
+  grid-template-columns: 1.2fr 0.8fr;
+  align-items: center;
+ }
+ .hero__eyebrow { color: var(--teal-soft); }
+ .hero__title { color: var(--on-dark); max-width: 16ch; }
+ .hero__lead { color: var(--on-dark-muted); max-width: 54ch; }
+ .hero__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-top: var(--space-5);
+ }
+ .hero__btn-ghost {
+  background: transparent;
+  color: var(--on-dark);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+ }
+ .hero__btn-ghost:hover { color: #fff; border-color: rgba(255, 255, 255, 0.6); }
+ .hero__demo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: var(--space-5);
+  font-size: var(--fs-sm);
+  color: var(--teal-soft);
+ }
+ .hero__mark-wrap { display: flex; justify-content: center; align-items: center; }
+ .hero__mark { width: min(360px, 60vw); height: auto; border-radius: var(--radius-lg); }
+
+ .how-card { display: flex; flex-direction: column; gap: 0.5rem; }
+ .how-card__n { color: var(--teal); font-weight: 800; font-size: var(--fs-lg); }
+
+     /* Section headers: title left, action right; stacks on mobile. */
+ .section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-5);
+ }
+
+     /* Larger primary CTA for the storefront. */
+ .btn--lg { padding: 0.85rem 1.6rem; font-size: var(--fs-base); }
+
+     /* Featured catalog + COA grids. */
+ .catalog-grid { gap: var(--space-5); }
+ .coa-grid { gap: var(--space-5); }
+
+     /* Quick-help CTA row. */
+ .cta-row {
+  display: flex;
+  gap: var(--space-3);
+  justify-content: center;
+  flex-wrap: wrap;
+ }
+
+ @media (max-width: 860px) {
+   .hero__grid {
+   grid-template-columns: 1fr;
+   text-align: center;
+   gap: var(--space-6);
+   }
+   .hero__copy { order: 2; }
+   .hero__mark-wrap { order: 1; }
+   .hero__title { max-width: none; }
+   .hero__lead { max-width: 46ch; margin-inline: auto; }
+   .hero__actions, .hero__demo { justify-content: center; }
+   .hero__mark { width: 200px; }
+   .section-head { text-align: left; }
+ }
+</style>

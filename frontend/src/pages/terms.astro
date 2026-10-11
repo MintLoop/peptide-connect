@@ -1,0 +1,19 @@
+---
+import EditPage from '../components/EditPage.astro';
+import { site } from '../config/site';
+---
+<EditPage
+        eyebrow="Legal"
+        title="Terms"
+        lead="Placeholder terms for the DEMO build. To be finalized by the owner and counsel in Phase C."
+        >
+    <p>
+     This is a demonstration build. Nothing here constitutes a binding agreement,
+      an offer, or a guarantee. All content is labeled DEMO and is provided for
+       the purpose of reviewing product shape, not for commerce.
+        </p>
+    <p>
+     <strong>Research use only.</strong> {site.researchDisclaimer}
+       </p>
+       <p class="muted">Finalized terms are a Phase C deliverable.</p>
+ </EditPage>

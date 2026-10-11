@@ -1,0 +1,92 @@
+---
+// src/components/BrandMark.astro
+// Renders the frozen brand mark. By default it references the approved SVG file
+// (via <img>) so nav/footer stay lightweight and the file stays the single
+// source of truth. With `inline`, it reads that same approved SVG at build time
+// and renders it inline so client-side enhancements (the hero entrance
+// animation) can target the actual <line>/<circle> nodes — WITHOUT mutating the
+// frozen geometry (4 nodes + 5 strokes; coordinates come from the approved
+// file / brand/geometry.json, never re-authored here).
+//
+// The `auto` variant renders BOTH the standard (full) and reversed mark and
+// toggles them with a single CSS rule on :root[data-theme], so the header mark
+// is the correct approved asset in light AND dark without any color filter.
+// Fixed variants (`full`/`reversed`/`mono`) render a single asset as before.
+import { readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+
+interface Props {
+  variant?: 'full' | 'reversed' | 'mono' | 'auto';
+  label?: string;
+  class?: string;
+  size?: number;
+  inline?: boolean;    // when true, render an inline <svg> (animateable) instead of <img>
+  id?: string;
+}
+const {
+  variant = 'full',
+  label = 'Peptide Connect',
+  class: className = '',
+  size = 32,
+  inline = false,
+  id,
+} = Astro.props;
+
+// Map variant -> the approved public asset. Reversed = for dark backgrounds
+// (its navy anchor flips to pale mint per the brand kit).
+const variantFile = variant === 'reversed' ? 'pc-mark-reversed.svg'
+   : variant === 'mono' ? 'pc-mark-mono.svg'
+   : 'pc-mark-full.svg';
+const assetPath = `/brand/${variantFile}`;
+const imgStyle = `width:${size}px;height:${size}px;`;
+
+// When inline, read the approved SVG and lift its inner markup so we can render
+// an inline <svg>. This preserves the exact approved geometry (the file is the
+// source; we only inject its inner children under an ARIA-labelled <svg>).
+let innerMarkup = '';
+if (inline) {
+   const path = resolve(process.cwd(), 'public/brand', variantFile);
+   const raw = readFileSync(path, 'utf8').trim();
+    // Drop the outer <svg…> / </svg> but keep the <g>…children…</g> (or any
+    // inner <line>/<circle> nodes). Keep the namespace so it stays valid.
+   innerMarkup = raw.replace(/^<svg[^>]*>/i, '').replace(/<\/svg>\s*$/i, '');
+    }
+---
+
+{inline
+ ? <svg class={`pc-anim ${className}`} viewBox="0 0 100 100"
+     width={size} height={size}
+     role="img" aria-label={label}
+     set:html={innerMarkup}>
+     </svg>
+ : variant === 'auto'
+   // Theme-aware: standard mark on light surfaces, reversed mark on dark.
+   // Both are the exact approved SVG assets; CSS swaps them by data-theme.
+   ? <picture class={`pc-brandmark ${className}`}>
+     <img class="pc-brandmark__img pc-brandmark__light"
+        src="/brand/pc-mark-full.svg"
+        alt={label}
+        width={size} height={size}
+        loading="eager" decoding="async"
+        style={imgStyle} />
+     <img class="pc-brandmark__img pc-brandmark__dark"
+        src="/brand/pc-mark-reversed.svg"
+        alt=""
+        width={size} height={size}
+        loading="eager" decoding="async"
+        style={imgStyle}
+        aria-hidden="true" />
+     </picture>
+ : <picture class={className} aria-hidden={variant === 'mono' ? 'true' : undefined}>
+      <!-- Reversed variant used on dark backgrounds (footer, hero). -->
+      <img
+      src={assetPath}
+      alt={label}
+      width={size}
+      height={size}
+      loading="eager"
+      decoding="async"
+      style={imgStyle}
+        />
+       </picture>
+}

@@ -1,0 +1,126 @@
+/* src/styles/tokens.css
+ * Design tokens for Peptide Connect.
+ * Brand palette is the frozen approved kit:
+ *   Navy #102D38 · Teal #12A89D · Pale mint #EAF5F2 · Off-white #F7F9FA
+ * The palette below mirrors src/config/site.ts#brand — keep them in sync.
+ * Hand-crafted token system (not Tailwind): low-dependency, maximally
+ * transferable, offline-safe at build time.
+ */
+
+:root {
+   /* Brand core (frozen) */
+    --navy: #102d38;
+   --teal: #12a89d;
+   --teal-strong: #0e8b83;
+   --teal-soft: #4fc4bb;
+   --pale-mint: #eaf5f2;
+   --off-white: #f7f9fa;
+
+   /* Semantic surfaces (LIGHT theme default) */
+   --bg: var(--off-white);
+   --surface: #ffffff;
+   --surface-2: var(--pale-mint);
+   --ink: var(--navy);             /* primary text on light */
+   --ink-2: #2f4a55;              /* secondary text */
+   --muted: #5c7178;             /* tertiary / captions */
+   --line: #d6e2e5;              /* hairlines / borders */
+   --line-soft: #e7eef0;
+
+    /* Sticky nav surface (a token so it flips with the theme). */
+    --nav-bg: rgba(247, 249, 250, 0.92);
+    --nav-border: #d6e2e5;
+
+    /* On-dark variants (used in footer / hero) */
+    --on-dark: #f7f9fa;
+    --on-dark-muted: #a9c2c7;
+
+    /* Warning / status colors for iconography */
+    --warning-yellow: #FFD166;
+    --warning-orange: #E07A5F;
+
+    /* Notice / warning backgrounds with on-dark variants */
+    --warn-bg: #fdf3e2;
+    --info-bg: #eaf5f2;
+    --on-dark--warn-bg: #3b2612; /* Dark warning background */
+    --on-dark--info-bg: #0f2627; /* Dark info background */
+
+  /* Accent / status */
+  --warn: #b7791f;
+  --warn-bg: #fdf3e2;
+  --ok: #0e8b83;
+  --ok-bg: #e6f4f2;
+  --info-bg: #eaf5f2;
+  /* Semantic notice surfaces (theme-aware for informational / warning) */
+  --notice-surface: var(--surface);
+  --notice-surface-2: var(--surface-2);
+  --notice-border: var(--line);
+  --notice-text: var(--ink);
+  --notice-title-text: var(--ink-2);
+
+  /* Type */
+  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Inter, system-ui,
+    sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code",
+    Menlo, Consolas, monospace;
+
+  /* Type scale (1rem base, ~1.5 rhythm). Optical letter-spacing for display. */
+  --fs-xs: 0.75rem;   /* 12 */
+  --fs-sm: 0.875rem;  /* 14 */
+  --fs-base: 1rem;    /* 16 */
+  --fs-md: 1.125rem;  /* 18 */
+  --fs-lg: 1.375rem;  /* 22 */
+  --fs-xl: 1.75rem;   /* 28 */
+  --fs-2xl: 2.25rem;  /* 36 */
+  --fs-3xl: 3rem;     /* 48 */
+  --fs-4xl: 3.75rem;  /* 60 */
+
+  /* Spacing scale (4px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4rem;
+  --space-9: 6rem;
+
+  /* Radii, shadow, layout */
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --radius-pill: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(16, 45, 56, 0.06), 0 1px 3px rgba(16, 45, 56, 0.08);
+  --shadow-md: 0 4px 12px rgba(16, 45, 56, 0.10), 0 2px 4px rgba(16, 45, 56, 0.06);
+  --shadow-lg: 0 18px 40px rgba(16, 45, 56, 0.16);
+
+  --ring: 0 0 0 3px rgba(18, 168, 157, 0.35);
+
+  --maxw: 1180px;
+  --maxw-narrow: 760px;
+  --gutter: clamp(1rem, 4vw, 2rem);
+
+  /* Motion */
+   --ease: cubic-bezier(0.2, 0.7, 0.3, 1);
+  }
+
+  /* ---------- DARK THEME (opt-in, premium navy/teal) ----------
+  An explicit, persisted alternative to the light storefront. Flips the
+  semantic surface/text tokens; the frozen brand core + on-dark tokens are
+  reused so the hero/footer keep their contrast in both modes. */
+  :root[data-theme="dark"] {
+  --bg: #0a2027;                /* deep navy — premium base */
+  --surface: #10333d;
+  --surface-2: #123640;
+  --ink: var(--on-dark);        /* primary text on dark = off-white */
+  --ink-2: #cfe0e3;
+  --muted: #98b3b8;
+  --line: #1c454f;
+  --line-soft: #17404a;
+  --nav-bg: rgba(10, 32, 39, 0.92);
+  --nav-border: #1c454f;
+  }
+  @media (prefers-reduced-motion: reduce) {
+   :root { --ease: linear; }
+  }

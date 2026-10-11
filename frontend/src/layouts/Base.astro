@@ -1,0 +1,125 @@
+---
+// src/layouts/Base.astro
+// Shared document shell: <head> (SEO + token CSS + favicons), demo banner, nav,
+// skip link, main, footer. Layout content is a slot (children).
+//
+// Per-brief Phase B: responsive, semantic, a11y, SEO metadata. All brand tokens
+// come from the centralized config (site.ts) + design tokens.css — nothing is
+// hardcoded ad-hoc.
+
+import { site, DEMO } from '../config/site';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
+import DemoBanner from '../components/DemoBanner.astro';
+
+interface Props {
+   title?: string;
+   description?: string;
+   image?: string;            // social image path
+   ogType?: string;
+   themeColor?: string;
+   noIndex?: boolean;
+   bodyClass?: string;
+}
+const {
+   title,
+   description = site.description,
+   image = '/brand/peptide-connect-logo-full.png',
+   ogType = 'website',
+   themeColor = site.brand.navy,
+   noIndex = false,
+   bodyClass = '',
+} = Astro.props;
+
+const fullTitle = title ? `${title} · ${site.name}` : `${site.name} — ${site.tagline}`;
+const canonical = `${site.url}${Astro.url.pathname === '/' ? '' : Astro.url.pathname}`;
+---
+
+<!doctype html>
+<html lang="en" data-demo={DEMO ? 'true' : 'false'}>
+<head>
+   <meta charset="utf-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+   <title>{fullTitle}</title>
+   <meta name="description" content={description} />
+   {noIndex && <meta name="robots" content="noindex, nofollow" />}
+
+   <!-- Theme + brand color -->
+   <meta name="theme-color" content={themeColor} />
+   <meta name="color-scheme" content="light" />
+
+   <!-- Social / Open Graph -->
+   <meta property="og:type" content={ogType} />
+   <meta property="og:site_name" content={site.name} />
+   <meta property="og:title" content={fullTitle} />
+   <meta property="og:description" content={description} />
+   <meta property="og:url" content={canonical} />
+   <meta property="og:image" content={`${site.url}${image}`} />
+   <meta name="twitter:card" content="summary_large_image" />
+   <meta name="twitter:title" content={fullTitle} />
+   <meta name="twitter:description" content={description} />
+   <meta name="twitter:image" content={`${site.url}${image}`} />
+
+   <!-- Favicon (approved constellation, native sizes) -->
+   <link rel="icon" type="image/png" sizes="32x32" href="/brand/favicon-32.png" />
+   <link rel="icon" type="image/png" sizes="16x16"  href="/brand/favicon-16.png" />
+   <link rel="apple-touch-icon"  sizes="180x180"    href="/brand/favicon-180.png" />
+   <link rel="manifest" href="/site.webmanifest" />
+
+   <!-- Canonical -->
+   <link rel="canonical" href={canonical} />
+
+   <!-- JSON-LD: organization + web site (structured, no unverified claims) -->
+   <script type="application/ld+json" set:html={JSON.stringify({
+     "@context": "https://schema.org",
+     "@type": "Organization",
+     "name": site.name,
+     "url": site.url,
+     "description": site.description,
+     "logo": `${site.url}/brand/peptide-connect-logo-full.png`,
+     "contactPoint": [{
+      "@type": "PostalOrEmailContact",
+      "email": site.contact.email,
+      "contactType": "general",
+     }],
+   })} />
+
+   <!-- Design tokens + global app styles. No Tailwind at runtime. -->
+    <!-- No-flash theme boot: resolve the persisted / system theme and set it on
+       <html> synchronously, before first paint, so the page never renders in the
+       wrong theme. Explicit choice (localStorage) wins over system preference. -->
+    <script is:inline>
+     (function () {
+       var root = document.documentElement;
+       var STORAGE = 'pc-theme';
+       var saved = null;
+       try { saved = localStorage.getItem(STORAGE); } catch (e) {}
+       var theme;
+       if (saved === 'light' || saved === 'dark') {
+          theme = saved;
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+          theme = 'dark';
+        } else {
+          theme = 'light';
+        }
+       root.setAttribute('data-theme', theme);
+        root.style.colorScheme = theme;
+      })();
+     </script>
+    <link rel="stylesheet" href="/styles/tokens.css" />
+     <link rel="stylesheet" href="/styles/app.css" />
+
+   <!-- Client-side only interactive bits: mobile nav, demo banner, catalog
+        filter, COA search, cart. Layout is server-rendered; these enhance only. -->
+   <script is:inline type="module" src="/js/app.js" data-defer />
+</head>
+<body class={bodyClass}>
+   <a class="skip-link" href="#main">Skip to content</a>
+   {DEMO && <DemoBanner />}
+   <Nav />
+   <main id="main">
+    <slot />
+   </main>
+   <Footer />
+</body>
+</html>

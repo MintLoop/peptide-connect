@@ -1,0 +1,29 @@
+---
+import EditPage from '../components/EditPage.astro';
+import { site } from '../config/site';
+---
+<EditPage
+    eyebrow="Contact"
+    title="Contact"
+    lead="Questions about the product, a request, or a verification? Reach out."
+     >
+    <p>
+     This is a DEMO build — no contact form is wired to a backend and no email is
+      sent. In Phase C, contact goes through a validated, rate-limited channel
+      (Resend + Svix-verified webhooks, PII-minimized).
+       </p>
+
+       <dl style="display:grid;grid-template-columns:auto 1fr;gap:.6rem 1.25rem;
+                  font-size:var(--fs-base);">
+        <dt class="muted-strong">Email</dt>
+        <dd style="margin:0;"><a href={`mailto:${site.contact.email}`}>{site.contact.email}</a></dd>
+        <dt class="muted-strong">Response window</dt>
+        <dd style="margin:0;" class="muted">{site.contact.hours}</dd>
+        <dt class="muted-strong">Legal entity</dt>
+        <dd style="margin:0;" class="muted">{site.legal.entity}</dd>
+       </dl>
+
+       <p class="muted" style="font-size:var(--fs-sm);">
+        For laboratory research use only. Not for human or veterinary consumption.
+        </p>
+ </EditPage>

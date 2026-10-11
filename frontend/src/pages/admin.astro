@@ -1,0 +1,102 @@
+---
+// src/pages/admin.astro — Admin dashboard shell.
+// SECURITY POSTURE: this is a non-interactive, noindex shell. It performs NO
+// unsecured production operations: no real auth, no database writes, no PII,
+// no mutations. The "lock" button explicitly shows access is deferred to a
+// real server session + non-guessable URL token in Phase C.
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+---
+<Base title="Admin" noIndex>
+ <PageHeader
+   eyebrow="Restricted · DEMO shell"
+   title="Admin dashboard"
+   lead="Frontend shell only. No real authentication, no data, and no mutations are performed here."
+   />
+
+   <section class="section section--tight">
+     <div class="container">
+
+       <div class="callout callout--warn" style="margin-bottom:var(--space-6);">
+         <div class="callout__title">
+          <span class="badge badge--draft">No unsecured operations</span>
+          Access is deferred to Phase C
+         </div>
+         <p style="margin:0;">
+        This build intentionally does <strong>not</strong> implement real admin
+          authentication. A production admin requires a server-side session, a
+         non-guessable URL token, rate limiting, input validation, and an audit
+          log — none of which exist yet.
+         </p>
+       </div>
+
+       <!-- The "locked" panel -->
+       <div class="card"
+        id="admin-lock"
+        tabindex="0"
+        role="button"
+        aria-label="Admin lock — access deferred to Phase C"
+        style="
+          cursor: not-allowed;
+          border: 1px dashed var(--warn);
+          background: var(--warn-bg);
+          text-align: center;
+          padding: var(--space-8);
+         "
+       >
+         <h3 style="margin-top:0;">🔒 Access denied</h3>
+         <p class="muted" style="max-width:52ch;margin-inline:auto;">
+        Click to see why. The admin panel requires a server session and a
+         non-guessable URL token. This shell performs no mutations and exposes
+          no real data.
+         </p>
+        <div
+          id="admin-lock-msg"
+          style="display:none;margin-top:var(--space-4);"
+          aria-live="polite">
+        </div>
+       </div>
+
+       <!-- Dashboard placeholders (read-only, all DEMO) -->
+       <h2 style="margin-top:var(--space-8);">Dashboard (placeholder tiles)</h2>
+       <div class="grid grid--3">
+          <div class="card">
+           <p class="muted" style="font-size:var(--fs-xs);text-transform:uppercase;
+                                  letter-spacing:.08em;margin:0;">Open requests</p>
+           <p class="mono" style="font-size:var(--fs-3xl);margin:.25rem 0;color:var(--teal);">—</p>
+           <p class="muted" style="font-size:var(--fs-xs);margin:0;">No real data · DEMO</p>
+          </div>
+         <div class="card">
+           <p class="muted" style="font-size:var(--fs-xs);text-transform:uppercase;
+                                  letter-spacing:.08em;margin:0;">Stalled (&gt;48h)</p>
+           <p class="mono" style="font-size:var(--fs-3xl);margin:.25rem 0;color:var(--warn);">—</p>
+           <p class="muted" style="font-size:var(--fs-xs);margin:0;">No real data · DEMO</p>
+          </div>
+         <div class="card">
+           <p class="muted" style="font-size:var(--fs-xs);text-transform:uppercase;
+                                  letter-spacing:.08em;margin:0;">COA coverage</p>
+           <p class="mono" style="font-size:var(--fs-3xl);margin:.25rem 0;color:var(--ink);">0%</p>
+           <p class="muted" style="font-size:var(--fs-xs);margin:0;">No COAs on file · honest</p>
+          </div>
+       </div>
+
+       <h2 style="margin-top:var(--space-8);">What Phase C will add</h2>
+       <div class="card stack" style="gap:.5rem;">
+        <p class="muted" style="margin:0;">
+          <strong>Auth:</strong> server-side session (httpOnly cookie) + non-guessable
+          URL token, rate limiting, input validation.
+         </p>
+         <p class="muted" style="margin:0;">
+          <strong>Data:</strong> request queue, status transitions, stalled-order
+          view, CSV export, product CRUD, site-config editor.
+         </p>
+        <p class="muted" style="margin:0;">
+         <strong>Audit:</strong> append-only log of who/when/what for every mutation.
+         </p>
+        <p class="muted" style="margin:0;">
+          <strong>Comms:</strong> Resend + Svix-verified webhooks, fail-safe, PII-minimized.
+         </p>
+       </div>
+     </div>
+   </section>
+</Base>

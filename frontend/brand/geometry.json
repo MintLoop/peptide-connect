@@ -1,0 +1,30 @@
+{
+   "$comment": "Peptide Connect constellation mark — geometry reconstructed from the approved 1254x1254 icon (peptide-connect-icon.png) via pixel erosion + connected-components analysis. Coordinates are NORMALIZED to a 0..100 viewbox (top-left origin). This is the single source of truth for every logo variant and favicon. DO NOT introduce a 5th node, a hexagon frame, or a flower — the mark is 4 asymmetric nodes + 5 straight strokes + 1 navy anchor.",
+   "viewbox": "0 0 100 100",
+   "colors": {
+    "navy":   "#102D38",
+    "teal":   "#12A89D",
+    "measured_navy": "#073348",
+    "measured_teal": "#01B4B8",
+    "note": "Brand palette tokens are #102D38 / #12A89D per the approved kit. Measured raster samples were navy ~rgb(7,51,72), teal ~rgb(1,180,184). Vector uses brand tokens; measured values kept for QA comparison."
+   },
+   "nodes": [
+     {"id": "TL",       "x": 67.2, "y": 34.9, "r": 14.7, "color": "teal", "role": "teal · large"},
+     {"id": "NL",       "x": 32.6, "y": 74.7, "r": 14.4, "color": "navy", "role": "navy · large · anchor"},
+     {"id": "TM",       "x": 75.9, "y": 79.4, "r": 8.6,  "color": "teal", "role": "teal · medium"},
+     {"id": "TS",       "x": 28.7, "y": 43.9, "r": 8.0,  "color": "teal", "role": "teal · small"}
+   ],
+   "edges": [
+     {"from": "TL", "to": "NL", "color": "teal"},
+     {"from": "TL", "to": "TM", "color": "teal"},
+     {"from": "TL", "to": "TS", "color": "teal"},
+     {"from": "NL", "to": "TM", "color": "teal"},
+     {"from": "NL", "to": "TS", "color": "teal"}
+   ],
+   "edgeStrokeWidth": 3.4,
+   "wordmark": {
+    "lines": ["PEPTIDE", "CONNECT"],
+    "connectTracked": true,
+    "note": "PEPTIDE and CONNECT stacked, bold, uppercase. CONNECT is letter-spaced (tracked). PEPTIDE takes the primary color (navy on light / white on dark / currentColor in mono), CONNECT takes teal. In the horizontal layout the icon sits left of a two-line stack."
+   }
+}
