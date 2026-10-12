@@ -8,3 +8,39 @@ artifacts/
 
 # OS
 .DS_Store
+
+# Credential-bearing environments at any project depth; public examples stay visible.
+.env
+.env.*
+!.env.example
+.envrc
+.secrets/
+secrets.local/
+credentials.local.*
+*.local.pem
+*.local.key
+id_rsa
+id_ed25519
+
+# Dependencies and generated frontend output.
+node_modules/
+/frontend/dist/
+/frontend/.astro/
+
+# Temporary files, editor state, and local browser/test output.
+*.log
+*.tmp
+*.swp
+*.swo
+*~
+.idea/
+.vscode/*.local.json
+.cache/
+.playwright/
+.playwright-cli/
+test-results/
+playwright-report/
+blob-report/
+coverage/
+.coverage
+htmlcov/
