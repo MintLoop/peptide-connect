@@ -9,6 +9,8 @@
 // catalog, prices, suppliers, COAs, or customer PII. See `demo` flags below.
 // -----------------------------------------------------------------------------
 
+import { SITE_ORIGIN, CONTACT_EMAIL } from './origin';
+
 export type AvailabilityStatus = 'available' | 'inquire' | 'not_available';
 
 export interface NavItem {
@@ -52,9 +54,8 @@ export const site: SiteConfig = {
     'directories into structured, provenance-backed supplier evidence — ' +
     'distinguishing what is claimed, what is independently verified, and what is ' +
     'still unknown.',
-  // PLACEHOLDER domain — owner sets the real domain in Phase C (B4). Kept as a
-  // placeholder so the build is offline-safe and transferable.
-  url: 'https://peptideconnect.example',
+  // Production origin is configurable via PUBLIC_SITE_ORIGIN at build time.
+  url: SITE_ORIGIN,
 
   brand: {
     navy: '#102D38',
@@ -70,7 +71,7 @@ export const site: SiteConfig = {
   },
 
   contact: {
-    email: 'contact@peptideconnect.example',
+    email: CONTACT_EMAIL,
     hours: 'Response window: business hours, placeholder — set in Phase C.',
   },
 

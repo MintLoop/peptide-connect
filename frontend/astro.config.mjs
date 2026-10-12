@@ -19,8 +19,10 @@ import { defineConfig } from 'astro/config';
 //   wants the tree pruned, `npm rm @astrojs/react react react-dom @types/react
 //   @types/react-dom` is safe (none are imported) — no version bump needed.
 export default defineConfig({
-   site:'https://peptideconnect.example',   // PLACEHOLDER — owner sets real domain (Phase C / B4)
-   output: 'static',
+    // Public origin is configurable via PUBLIC_SITE_ORIGIN in a .env file.
+    // Default is the real production domain; do not use localhost for sharing.
+  site: process.env.PUBLIC_SITE_ORIGIN || 'https://peptide-connect.com',
+  output: 'static',
    image: {
       // Local raster brand assets only. No remote fetch at build (offline-safe, transferable).
      remotePatterns: [],

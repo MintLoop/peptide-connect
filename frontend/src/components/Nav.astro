@@ -240,14 +240,23 @@ import BrandMark from './BrandMark.astro';
       padding-top: var(--space-4);
      }
      .nav__list a[data-nav-link] {
-      color: var(--navy);
+      color: var(--ink); /* theme-aware: dark on light, light on dark */
       font-size: var(--fs-base);
-     }
+      text-decoration: none;
+      }
+     .nav__list a[data-nav-link]:hover,
+     .nav__list a[data-nav-link]:focus-visible {
+      color: var(--teal-strong);
+      }
      .nav__list a[data-nav-link]:focus-visible {
       outline: none;
       box-shadow: var(--ring);
       border-radius: var(--radius-sm);
-     }
+      }
+     .nav__list a[data-current] {
+      color: var(--ink);
+      font-weight: 700;
+      }
      .nav__cta { width: 100%; }
-    }
+     }
 </style>
