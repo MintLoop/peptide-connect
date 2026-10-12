@@ -1,0 +1,130 @@
+---
+// src/pages/documentation.astro — Analytical documentation explorer
+// (Journey 2, B.3.2). Renamed from coa.astro at /documentation; the client
+// search still reads #coa-search / #coa-results / data-coa-row, so the existing
+// COA evidence-state behavior is preserved untouched.
+//
+// HONEST, never fabricated: every ledger row is an empty / pending /
+// contradictory state. No purity, lab, lot, or date value is invented, and no
+// "verified"/"independently authenticated" result is ever claimed.
+import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
+import { DEMO_COA } from '../data/catalog';
+
+// The explorer is on: it surfaces honest empty/pending/contradictory states as
+// demonstration data. (A verified-record data source is future work only.)
+const EXPLORER_ENABLED = true;
+
+const statusLabel = (s: string) =>
+   s === 'no_record' ? 'No record on file'
+    : s === 'pending' ? 'Requested · pending lab report'
+    : s === 'contradictory' ? 'Report · uncorroborated'
+    : s;
+---
+<Base title="Documentation" noIndex>
+ <PageHeader
+   eyebrow="Documentation · Journey 2"
+   title="Analytical documentation explorer"
+   lead="Search analytical documentation by compound, lot, or supplier. This is the honesty layer: it shows what is on record, what is requested, and what is still unknown — and it never turns an absent record into a passing result." />
+ <section class="section section--tight">
+     <div class="container">
+
+       <div class="callout callout--warn" style="margin-bottom:var(--space-6);">
+         <div class="callout__title">
+          <span class="badge badge--demo">DEMO</span> No evidence is fabricated
+         </div>
+         <p style="margin:0;">
+        Every record below is a <strong>honest empty, pending, or contradictory
+        state</strong>. No purity, lab, lot, or date value is invented, and no
+        report is claimed to be independently verified. A missing record is a
+        successful, honest outcome — not a passed test.
+         </p>
+       </div>
+
+       <!-- Search -->
+       <div class="card" style="margin-bottom:var(--space-6);">
+        <div class="field" style="margin:0;">
+          <label for="coa-search">Search documentation (compound / lot / supplier)</label>
+          <input id="coa-search" type="search" placeholder="Search the ledger…"
+          autocomplete="off" />
+        </div>
+       </div>
+
+       {
+     !EXPLORER_ENABLED &&
+        <div id="coa-feature-off" class="empty" style="margin-bottom:var(--space-6);">
+          <h3>Explorer is not yet live</h3>
+          <p>A verified-documentation data source is future work. The ledger below
+            is shown so the shape is reviewable.</p>
+        </div>
+      }
+
+       <!-- Ledger -->
+       <div id="coa-results">
+         <div class="table-wrap card" style="padding:0;">
+           <table class="data">
+            <thead>
+             <tr>
+               <th>Compound</th>
+               <th>Lot</th>
+               <th>Supplier</th>
+               <th>Status</th>
+                <th>What is known</th>
+             </tr>
+          </thead>
+          <tbody>
+            {
+        DEMO_COA.map(r =>
+             <tr data-coa-row data-compound={r.compound} data-lot={r.lotNumber ?? ''}>
+               <td class="mono">{r.compound}</td>
+               <td class="muted">{r.lotNumber ? r.lotNumber : '— none on file —'}</td>
+               <td class="muted">{r.supplier ? r.supplier : '— not linked —'}</td>
+                <td>
+                 <span class={`badge ${
+                    r.status === 'no_record' ? 'badge--not-available'
+                     : r.status === 'pending' ? 'badge--inquire'
+                     : r.status === 'contradictory' ? 'badge--contradictory'
+                     : 'badge--demo'
+                   }`}>
+                   {statusLabel(r.status)}
+                 </span>
+                </td>
+               <td class="muted" style="font-size:var(--fs-xs);">{r.note}</td>
+              </tr>
+            )
+           }
+           </tbody>
+          </table>
+         </div>
+
+         <p id="coa-empty-results"
+          class="empty"
+          style="margin-top:var(--space-6);display:none;">
+          <h3>No documentation matches your search</h3>
+          <p>
+        No record in the ledger matches your search. A different lot would need
+         its own verification — absence here is not a passed result.</p>
+          </p>
+        </div>
+
+       <!-- Honest explainer (plain language, no internal terms) -->
+       <div class="grid grid--2" style="margin-top:var(--space-7);">
+         <div class="card">
+           <h3 style="margin-top:0;">What "no COA on record" means</h3>
+           <p class="muted" style="margin:0;">
+        A "no record on file" status is a successful, honest outcome. It means
+          we have not yet obtained a certificate for that lot. We do not infer a
+          pass, and we do not fill the gap with a fabricated value.</p>
+         </div>
+         <div class="card">
+           <h3 style="margin-top:0;">Documentation is not the same as verified</h3>
+           <p class="muted" style="margin:0;">
+        Documentation can be seller-submitted, manufacturer-supplied,
+          laboratory-issued, or, more rarely, independently corroborated. Each is
+          labeled by source. A self-reported report is <strong>never</strong>
+          shown as independently verified evidence.</p>
+         </div>
+       </div>
+     </div>
+   </section>
+</Base>

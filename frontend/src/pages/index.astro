@@ -1,9 +1,10 @@
 ---
-// src/pages/index.astro — Homepage (Phase B.1: seller-first storefront)
-// Structure per Phase B.1 M3: product-focused hero → prominent Browse catalog CTA →
-// featured demo products → the request/confirmation process → COA / research
-// transparency (supporting) → FAQ + contact. No health/dosing/purity claims.
-// DEMO posture via the persistent demo banner + per-section DEMO labels.
+// src/pages/index.astro — Homepage (B.3.2 Milestone A). Two complementary
+// journeys: Catalog (primary commercial) + Documentation (evidence/Administration).
+// Homepage headlines the two journeys: "Research materials, connected to the
+// evidence." and a compact "two ways to use" block (Catalog → Documentation →
+// Request). No health/dosing/purity claims. DEMO posture via persistent demo
+// banner + per-section DEMO labels.
 import Base from '../layouts/Base.astro';
 import BrandMark from '../components/BrandMark.astro';
 import ProductCard from '../components/ProductCard.astro';
@@ -12,67 +13,59 @@ import { PRODUCTS, CATALOG_META } from '../data/catalog';
 
 const featured = PRODUCTS.slice(0, 4);
 
-const steps = [
+const twoWays = [
    {
-    n: '01',
-    title: 'Browse & discover',
-    body: 'Explore a clearly-labeled catalog of research compounds with the ' +
-      'verification status of each — no unverified purity or clinical claims.',
-    },
-    {
-    n: '02',
-    title: 'Request, then confirm',
-    body: 'Add a compound and request it. A human reviews every order; nothing ' +
-      'is auto-fulfilled and no payment is processed in this build.',
-    },
-    {
-    n: '03',
-    title: 'Track by code',
-    body: 'Receive a unique, PII-free tracking code and follow your order ' +
-      'through to the next step.',
-    },
+     label: 'Catalog',
+     sub: 'Browse compounds with owner-supplied prices (shipping included).',
+     href: '/catalog',
+     primary: true,
+   },
+   {
+     label: 'Documentation',
+     sub: 'Explore honest documentation states — no fabricated COAs.',
+     href: '/documentation',
+     primary: false,
+   },
 ];
 
 const coaPoints = [
-    {
-    title: 'COA / Lot Verification Explorer',
-    body: 'Search certificates of analysis by compound, lot, or supplier. It ' +
-      'shows what is verified, what is requested, and what is still unknown — ' +
-      'never a fabricated pass.',
-    },
-    {
-    title: 'Honest empty states',
-    body: 'Absent a COA, we say so. "No record yet" is a successful, honest ' +
-       'outcome — not a fabricated result, and not a quiet downgrade of a claim.',
-    },
-    {
-    title: 'Claims are not facts',
-    body: 'Vendor-submitted testing is recorded separately from independently ' +
-       'sourced evidence. A claim is never quietly converted into a verified fact.',
-    },
+   {
+     title: 'Documentation explorer',
+     body: 'Search by compound, lot, or supplier. This explorer shows what is on record, what is requested, and what is still unknown — and it never turns an absent record into a passing result.',
+   },
+   {
+     title: 'Honest empty states',
+     body: 'Absent a record, we say so. A "no record" status is a successful, honest outcome — not a fabricated result, and not a downgrade of a claim.',
+   },
+   {
+     title: 'Documentation ≠ verified',
+     body: 'Documentation can be seller-submitted, manufacturer-supplied, laboratory-issued, or (rarely) independently corroborated. A self-reported report is never shown as independent evidence.',
+   },
 ];
 ---
 <Base>
-    <!-- 1. Product-focused hero with a prominent Browse catalog CTA -->
+    <!-- Two complementary journeys hero -->
      <section class="hero" style="
       background: radial-gradient(120% 120% at 80% 0%, #1a4653 0%, var(--navy) 60%);
       color: var(--on-dark);
       padding: clamp(3rem, 8vw, 6rem) 0;">
        <div class="container hero__grid">
          <div class="hero__copy">
-           <p class="eyebrow hero__eyebrow">Evidence-first · Research peptide catalog</p>
+           <p class="eyebrow hero__eyebrow">Research materials · Evidence explorer</p>
            <h1 class="hero__title">
-            A transparent catalog for the research-peptide market.
+            Research materials, connected to the evidence.
            </h1>
            <p class="lead hero__lead">
-            {site.name} turns scattered lab reports, supplier COAs, and directory
-             entries into structured, provenance-backed evidence — so you can
-             compare what is claimed, what is independently verified, and what is
-             still unknown before you request a compound.
+            {site.name} pairs a catalog of research materials with an evidence layer:
+            browse compounds and suppliers, review available product information, and
+            trace the analytical documentation behind supplier and lot claims. What is
+            claimed, what is verified, and what is still unknown are shown honestly —
+            no fabricated purity or certifications.
            </p>
            <div class="hero__actions">
             <a class="btn btn--on-dark btn--lg" href="/catalog">Browse catalog</a>
-            <a class="btn hero__btn-ghost btn--lg" href="/coa">COA Explorer</a>
+            <a class="btn btn--on-dark btn--ghost" href="/documentation">Documentation explorer</a>
+            <a class="btn hero__btn-ghost btn--ghost" href="/request">Request</a>
            </div>
            {
           DEMO &&
@@ -87,15 +80,33 @@ const coaPoints = [
            Inline so the entrance animation can draw its 5 strokes + 4 nodes
            (geometry read from the approved SVG file — never mutated). -->
           <div class="hero__mark-wrap">
-           <BrandMark variant="reversed" size={260}
-          class="hero__mark"
+           <BrandMark variant="reversed" size={260} class="hero__mark"
           inline
           label={`${site.shortName} constellation mark`} />
           </div>
        </div>
      </section>
 
-     <!-- 2 + 3. Featured demo product cards + request/confirmation process -->
+     <!-- Quick two-ways block -->
+     <section class="section section--tight">
+        <div class="container">
+          <div class="grid grid--2" style="margin-bottom:var(--space-7);">
+            {
+             twoWays.map(t => <div class="card" style="flex:1">
+                <p class="mono eyebrow" style="margin:0 0 var(--space-2);">{t.label}</p>
+                <h3 style="margin:0 0 var(--space-2);">{t.sub}</h3>
+                {
+                 t.primary
+                  ? <a class="btn btn--primary btn--sm" href={t.href}>{t.label}</a>
+                  : <a class="btn btn--ghost btn--sm" href={t.href}>{t.label}</a>
+                 }
+              </div>
+            )}
+          </div>
+        </div>
+     </section>
+
+     <!-- Catalog preview -->
      <section class="section" id="catalog-preview">
         <div class="container">
           <div class="section-head">
@@ -108,7 +119,7 @@ const coaPoints = [
           <p class="muted" style="max-width:60ch; margin-top:0;">
            {CATALOG_META.total} demo compounds. Every product, variant, and COA
             record below is <strong>DEMO</strong> data (dated {CATALOG_META.dataDate}). '
-           'Pricing is inquiry-only; no real purity or COA is shown.
+           'Pricing is inquiry-only and shipping-included; no real purity or COA is shown.
           </p>
           <div class="grid grid--2 catalog-grid" style="margin-top:var(--space-6);">
            {
@@ -130,14 +141,16 @@ const coaPoints = [
             </div>
             <div class="grid grid--3">
              {
-            steps.map(s =>
-                <div class="card how-card">
+            [
+             { n: '01', title: 'Browse & discover', body: 'Explore compounds in the catalog with status labels that are honest, not inflated.', },
+             { n: '02', title: 'Request', body: 'Submit a request — no payment is taken in this demo; a human reviews every inquiry.', },
+             { n: '03', title: 'Track', body: 'Receive a unique PII-free tracking code and follow the request through to the next step.', },
+            ].map(s => <div class="card how-card">
                   <span class="mono how-card__n">{s.n}</span>
                   <h3 style="margin:0;">{s.title}</h3>
                   <p class="muted" style="margin:0;">{s.body}</p>
                 </div>
-             )
-            }
+             )}
             </div>
             <div class="center" style="margin-top:var(--space-7);">
              <a class="btn btn--primary btn--lg" href="/request">Start a request</a>
@@ -145,11 +158,11 @@ const coaPoints = [
           </div>
         </section>
 
-        <!-- 5. Research documentation + COA transparency (supporting) -->
+        <!-- Documentation explorer section -->
         <section class="section" id="verification">
            <div class="container">
              <div class="center" style="margin-bottom:var(--space-7);">
-               <p class="eyebrow">Research documentation</p>
+               <p class="eyebrow">Documentation explorer</p>
                <h2>Verification over marketing</h2>
                <p class="lead" style="margin-inline:auto;">
                 {site.name} is a research tool, not a lab: it surfaces provenance,
@@ -159,21 +172,20 @@ const coaPoints = [
              </div>
              <div class="grid grid--3 coa-grid">
               {
-             coaPoints.map(c =>
-                 <div class="card">
+             coaPoints.map(c => <div class="card">
                    <h3 style="margin-top:0;">{c.title}</h3>
                    <p class="muted" style="margin:0;">{c.body}</p>
                  </div>
-             )
+             )}
               }
             </div>
             <div class="center" style="margin-top:var(--space-6);">
-             <a class="btn btn--ghost btn--lg" href="/coa">Open the COA Explorer</a>
+             <a class="btn btn--ghost btn--lg" href="/documentation">Open Documentation explorer</a>
             </div>
           </div>
         </section>
 
-        <!-- 6. FAQ + contact -->
+        <!-- FAQ + contact -->
         <section class="section section--tight help-section">
            <div class="container container--narrow center">
             <h2>Questions?</h2>

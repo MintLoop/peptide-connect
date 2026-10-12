@@ -1,0 +1,20 @@
+---
+// src/components/DocumentationBadge.astro
+// A single, customer-understandable badge stating the evidence / documentation
+// state for a compound. Only HONEST states are ever shown (no "verified"/
+// "independently authenticated" results are fabricated in this build).
+import { documentationLabel, type DocumentationState } from '../data/catalog';
+
+interface Props { state: string }
+const { state } = Astro.props;
+const key = state as DocumentationState;
+
+// Visual treatment: neutral for "none", attention for "pending"/"contradictory".
+const cls =
+   state === 'pending' ? 'badge--inquire'
+   : state === 'contradictory' ? 'badge--contradictory'
+   : 'badge--demo';
+---
+<span class={`badge ${cls}`} title={documentationLabel(key)}>
+   {documentationLabel(key)}
+</span>

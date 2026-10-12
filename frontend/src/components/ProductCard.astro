@@ -1,62 +1,141 @@
 ---
 // src/components/ProductCard.astro
-// A catalog card. DEMO-safe: never shows a real purity/COA claim. The
-// "COA available" badge only renders when coaAvailable is true (always false in
-// the DEMO data — honest empty state).
+// A catalog card (B.3.2). Hierarchy: name dominant, a neutral chemical
+// descriptor beneath it, a compact spec block, one clear price line, and just
+// two meaningful status badges (availability + documentation). The old variant
+// "pills" became one tidy variant/price row. The client filter reads
+// data-name/compound/family/status, so those attributes are preserved exactly.
+// No fabricated COA/purity/claims; COA state is an honest empty/pending badge.
 import type { Product } from '../data/catalog';
+import { priceRange } from '../data/catalog';
 import StatusBadge from './StatusBadge.astro';
+import DocumentationBadge from './DocumentationBadge.astro';
 
 interface Props { product: Product }
 const { product } = Astro.props;
+const { min, max } = priceRange(product);
+const priceText = min === max ? `$${min}` : `From $${min}`;
+const priceSpread = min === max ? '' : `$${min}–$${max}`;
+const sizeText = product.variants.map(v => v.label).join(' · ');
 ---
 <article class="card product-card"
    data-product-card
    data-name={product.name}
    data-compound={product.compound}
    data-family={product.family}
-   data-status={product.status}
-   style="display:flex;flex-direction:column;gap:var(--space-3);">
-    <div class="flex justify-between items-center">
-      <StatusBadge status={product.status} />
-      {product.coaAvailable
-        ? <span class="badge badge--available">COA on file</span>
-        : <span class="badge badge--demo" title="No COA published for this lot">No COA</span>}
-    </div>
+   data-status={product.status}>
+   <div class="pcard__head">
+     <StatusBadge status={product.status} />
+     <DocumentationBadge state={product.documentation} />
+   </div>
 
-    <h3 style="margin:0;font-size:var(--fs-md);">
-      <a href={`/catalog/${product.slug}`} style="color:inherit;text-decoration:none;">
-        {product.name}
-      </a>
-    </h3>
+   <h3 class="pcard__name">
+     <a href={`/catalog/${product.slug}`} aria-label={`${product.name} — view details`}>
+       {product.name}
+     </a>
+   </h3>
 
-    <p class="muted" style="font-size:var(--fs-sm);margin:0;">
-      <span class="mono">{product.compound}</span>
-    </p>
+   <p class="pcard__compound">{product.compound}</p>
 
-    <dl style="display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;
-              font-size:var(--fs-sm);margin:0;">
-      <dt class="muted-strong">Family</dt><dd style="margin:0;">{product.family}</dd>
-      <dt class="muted-strong">Form</dt><dd style="margin:0;">{product.form}</dd>
-      <dt class="muted-strong">Route</dt><dd style="margin:0;">{product.route}</dd>
-     </dl>
+   <dl class="pcard__specs">
+     <dt>Family</dt><dd>{product.family}</dd>
+     <dt>Form</dt><dd>{product.form}</dd>
+     <dt>Route</dt><dd>{product.route}</dd>
+     <dt>Sizes</dt><dd>{sizeText}</dd>
+   </dl>
 
-    <div class="flex flex-wrap gap-2" style="margin-top:auto;padding-top:var(--space-3);">
-     {product.variants.map(v =>
-        <span class="badge badge--demo" style="text-transform:none;">{v.label}</span>
-      )}
-    </div>
+   {
+   product.draftFlag && <p class="pcard__draft">Draft · pending owner review</p>
+   }
 
-    <p class="muted" style="font-size:var(--fs-xs);">
-      {product.draftFlag ? 'Draft · pending owner review. ' : ''}
+   <div class="pcard__price">
+     <span class="pcard__amount">{priceText}</span>
+     {priceSpread && <span class="pcard__from">{priceSpread}</span>}
+     <span class="pcard__ship">shipping included</span>
+   </div>
+
+   <div class="pcard__actions">
+     <a class="btn btn--ghost btn--sm" href={`/catalog/${product.slug}`}>
+       View details
+     </a>
+     {
+     product.status !== 'not_available'
+         ? <a class="btn btn--primary btn--sm" href={`/request?product=${product.slug}`}>Request</a>
+         : <span class="badge badge--not-available" aria-disabled="true">Unavailable</span>
+     }
+   </div>
+
+   <p class="pcard__note">
      Research use only. Not for human or veterinary consumption.
-    </p>
+   </p>
+ </article>
 
-    <div class="flex gap-2" style="margin-top:var(--space-2);align-items:center;">
-       <a class="btn btn--ghost btn--sm" href={`/catalog/${product.slug}`}>
-        View details
-       </a>
-      {product.status !== 'not_available'
-       ? <a class="btn btn--primary btn--sm" href={`/request?product=${product.slug}`}>Request</a>
-        : <span class="badge badge--not-available" aria-disabled="true" style="cursor:not-allowed;align-self:center;">Unavailable</span>}
-     </div>
-    </article>
+<style>
+ .product-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  height: 100%;
+ }
+ .pcard__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+ }
+ .pcard__name {
+  margin: 0;
+  font-size: var(--fs-lg);
+  line-height: 1.1;
+  font-weight: 800;
+ }
+ .pcard__name a { color: inherit; text-decoration: none; }
+ .pcard__name a:hover { color: var(--teal-strong); }
+ .pcard__compound {
+  margin: 0;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--muted);
+  letter-spacing: -0.01em;
+ }
+ .pcard__specs {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.3rem 0.9rem;
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-sm);
+  border-top: 1px solid var(--line-soft);
+  padding-top: var(--space-3);
+ }
+ .pcard__specs dt { color: var(--muted); font-weight: 600; }
+ .pcard__specs dd { margin: 0; color: var(--ink-2); }
+ .pcard__draft {
+  margin: 0;
+  font-size: var(--fs-xs);
+  color: var(--warn);
+  font-weight: 600;
+ }
+ .pcard__price {
+  display: flex;
+  align-items: baseline;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-top: auto;
+  padding-top: var(--space-3);
+ }
+ .pcard__amount { font-size: var(--fs-md); font-weight: 800; color: var(--ink); }
+ .pcard__from { font-size: var(--fs-xs); color: var(--muted); font-family: var(--font-mono); }
+ .pcard__ship { font-size: var(--fs-xs); color: var(--muted); }
+ .pcard__actions {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  margin-top: var(--space-3);
+ }
+ .pcard__note {
+  margin: var(--space-2) 0 0;
+  font-size: var(--fs-xs);
+  color: var(--muted);
+ }
+</style>

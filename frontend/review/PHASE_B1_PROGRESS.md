@@ -117,3 +117,57 @@ Files: `src/components/BrandMark.astro`, `src/components/Nav.astro`, `public/sty
 - Reduced-motion verification via `matchMedia` guard exists but harness cannot force system preference changes; documented that the fallback is code-verified.
 
 ---
+
+## B.3.2 Milestone A — Hybrid Brand Identity (Catalog + Documentation journeys)
+
+**Status:** DONE + VERIFIED
+
+**What changed:**
+
+1. **Homepage rewrite:** New headline "Research materials, connected to the evidence." and a compact "two-ways" block emphasizing Catalog (primary) + Documentation (secondary). Secondary CTA "Request" under the hero. Two-column hero layout preserved; BrandMark constellation entrance unchanged.
+
+2. **Catalog landing (`src/pages/catalog/index.astro`):** Updated CATALOG_META to reflect new posture (honest, shipping-included pricing). Search filter bar preserved (IDs & data-attributes unchanged). Featured compound count updated (11 compounds / 15 variants). "Browse the catalog" heading and "shipping included" pricing note added.
+
+3. **ProductCard (`src/components/ProductCard.astro`):** New hierarchy — dominant name under bold headline, neutral chemical descriptor below, compact spec block (Family/Form/Route/Sizes), single clear price line (from + spread + "shipping included"), two meaningful status badges only (StatusBadge + DocumentationBadge). Variant list compacted into price row. Preserved data attributes (`data-product-card`, `data-name`, `data-compound`, `data-family`, `data-status`) for client-side filter.
+
+4. **Documentation explorer (`src/pages/documentation.astro`, formerly coa.astro):** Route renamed `/documentation` (nav now points to this). Updated to honest states (`no_record` → "No record on file", `pending` → "Requested · pending lab report", `contradictory` → "Report · uncorroborated"). Supplier column shows honest values ("Not linked", "Supplier A (unverified)"). "What is known" column contains honest plain-language notes. Explainer cards updated to customer-friendly language (removed internal schema terms; honest empty states explained). Search inputs preserved (#coa-search, #coa-results, [data-coa-row], data-compound, data-lot).
+
+5. **Navigation rename:** "COA Explorer" → "Documentation" across nav and footer (site.ts, footerNav, nav). Redirect `/coa` → `/documentation` via meta refresh (no server redirect needed for static build).
+
+6. **New DocumentationBadge component (`src/components/DocumentationBadge.astro`):** Single-badge representation of documentation state using honest labels only. Badge classes: `badge--demo` (neutral), `badge--inquire` (amber), `badge--contradictory` (dashed warn). Handles future full taxonomy while keeping honest posture now.
+
+7. **Design tokens (`src/data/catalog.ts`):** New data shape reflecting owner-supplied prices with "shipping included". 11 compounds (including owner-added **Tirzepatide 20 mg $100, 40 mg $130**) and 15 variants. Documentation state taxonomy (`none`/`pending`/`contradictory` populated; `seller_submitted`/`manufacturer_supplied`/`lab_issued`/`independently_corroborated` defined but unpopulated). Honest COA/supplier states across data.
+
+8. **App styles (`public/styles/app.css`):** Added `.badge--contradictory` dashed warn variant (background + color + border, same as `.badge--draft`) for "Report · uncorroborated" badge.
+
+**Build verification:**
+- `astro build` → 25 pages, 0 errors.
+- All pages compiled: homepage, catalog (list + 11 slugs), documentation (replacing coa), redirect page (/coa → /documentation).
+- No console errors; all HTML inspection confirms presence of new headline, two-ways block, catalog cards with DocumentationBadge, documentation explorer with honest states.
+
+**Key acceptance criteria verified:**
+- Homepage headline is "Research materials, connected to the evidence." ✓
+- Two-ways block (Catalog → Documentation → Request) present and correctly linked ✓
+- Catalog page shows 11 compounds / 15 variants with shipping-included pricing note ✓
+- Product cards show dominant name, price line with from/spread/shipping, two meaningful status badges, variant compacted ✓
+- Documentation explorer shows honest states, no fabricated COAs, customer-friendly language ✓
+- Nav/footer rename "COA Explorer" → "Documentation" ✓
+- Redirect page at /coa present (meta refresh) ✓
+- No console errors ✓
+- No fabrication of purity/test/supplier/cert data; documentation states honest ✓
+
+**Files changed:**
+- `src/data/catalog.ts` (new 413-line data shape with 11 compounds, 15 variants, honest COA states)
+- `src/components/DocumentationBadge.astro` (new, 21 lines)
+- `src/components/ProductCard.astro` (rewrite, 4231 bytes)
+- `src/pages/index.astro` (homepage rewrite, 11733 bytes)
+- `src/pages/catalog/index.astro` (catalog landing update, 3308 bytes)
+- `src/pages/documentation.astro` (new, 5533 bytes, replaces coa.astro)
+- `src/pages/coa.astro` (redirect static page, 444 bytes)
+- `src/config/site.ts` (tagline + description + nav/footerNav rename, COA Explorer → Documentation)
+- `public/styles/app.css` (add `.badge--contradictory` variant)
+
+**Unresolved / minor:**
+- None (M-A is complete). Milestone B is pending (About/Contact/Request/Order/FAQ wording changes).
+
+---

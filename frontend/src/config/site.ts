@@ -48,13 +48,15 @@ export const site: SiteConfig = {
   name: 'Peptide Connect',
   shortName: 'Peptide Connect',
   tagline:
-    'Evidence-first supplier intelligence and verification for the research-peptide market.',
+     'Research materials, connected to the evidence.',
   description:
-    'Peptide Connect turns fragmented laboratory reports, supplier COAs, and ' +
-    'directories into structured, provenance-backed supplier evidence — ' +
-    'distinguishing what is claimed, what is independently verified, and what is ' +
-    'still unknown.',
+     'Peptide Connect pairs a catalog of research materials with an evidence ' +
+     'layer: explore compounds and suppliers, review available product ' +
+     'information, and trace the analytical documentation behind supplier and ' +
+     'lot claims. What is claimed, what is verified, and what is still unknown ' +
+     'are shown honestly — no fabricated purity or certifications.',
   // Production origin is configurable via PUBLIC_SITE_ORIGIN at build time.
+  // Default is the real public domain; see src/config/origin.ts.
   url: SITE_ORIGIN,
 
   brand: {
@@ -71,48 +73,52 @@ export const site: SiteConfig = {
   },
 
   contact: {
+    // Derive the contact address from the production origin's host so a domain
+    // transfer never leaves a stale email behind.
     email: CONTACT_EMAIL,
     hours: 'Response window: business hours, placeholder — set in Phase C.',
   },
 
-  // Public navigation. Admin is intentionally NOT in public nav (authenticated).
+  // Public navigation. Two complementary journeys: Catalog (commercial) and
+  // Documentation (evidence/Administration). Admin is intentionally NOT in
+  // public nav (authenticated).
   nav: [
-    { label: 'Catalog', href: '/catalog' },
-    { label: 'COA Explorer', href: '/coa' },
-    { label: 'Request', href: '/request' },
-    { label: 'Order status', href: '/order' },
-    { label: 'FAQ', href: '/faq' },
-    { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' },
-  ],
+     { label: 'Catalog', href: '/catalog' },
+     { label: 'Documentation', href: '/documentation' },
+     { label: 'Request', href: '/request' },
+     { label: 'Order status', href: '/order' },
+     { label: 'FAQ', href: '/faq' },
+     { label: 'About', href: '/about' },
+     { label: 'Contact', href: '/contact' },
+   ],
 
   footerNav: [
     {
-      title: 'Product',
+      title: 'Catalog',
       links: [
-        { label: 'Catalog', href: '/catalog' },
-        { label: 'COA Explorer', href: '/coa' },
-        { label: 'Request an order', href: '/request' },
-        { label: 'Order status', href: '/order' },
-      ],
-    },
-    {
+         { label: 'Catalog', href: '/catalog' },
+         { label: 'Documentation', href: '/documentation' },
+         { label: 'Request an order', href: '/request' },
+         { label: 'Order status', href: '/order' },
+       ],
+     },
+     {
       title: 'Company',
       links: [
-        { label: 'About', href: '/about' },
-        { label: 'FAQ', href: '/faq' },
-        { label: 'Contact', href: '/contact' },
-      ],
-    },
-    {
+         { label: 'About', href: '/about' },
+         { label: 'FAQ', href: '/faq' },
+         { label: 'Contact', href: '/contact' },
+       ],
+     },
+     {
       title: 'Legal',
       links: [
-        { label: 'Privacy', href: '/privacy' },
-        { label: 'Terms', href: '/terms' },
-        { label: 'Shipping & Returns', href: '/shipping' },
-      ],
-    },
-  ],
+         { label: 'Privacy', href: '/privacy' },
+         { label: 'Terms', href: '/terms' },
+         { label: 'Shipping & Returns', href: '/shipping' },
+       ],
+     },
+   ],
 
   researchDisclaimer:
     'For laboratory research use only. Not for human or veterinary ' +

@@ -159,9 +159,14 @@ hr { border: none; border-top: 1px solid var(--line); margin: var(--space-6) 0; 
 .badge--inquire { background: var(--pale-mint); color: var(--teal-strong); }
 .badge--not-available { background: #f0e2e2; color: #a23b3b; }
 .badge--draft {
-   background: var(--warn-bg);
-   color: var(--warn);
-   border: 1px dashed var(--warn);
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px dashed var(--warn);
+}
+.badge--contradictory {
+  background: var(--warn-bg);
+  color: var(--warn);
+  border: 1px dashed var(--warn);
 }
 .badge--demo {
   background: var(--pale-mint);
